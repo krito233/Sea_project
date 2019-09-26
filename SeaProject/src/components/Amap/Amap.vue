@@ -10,7 +10,7 @@
 
 <script>
 import {loadAmap} from './loadAmap'
-import {request} from '../../net/request'
+import {request, head} from '../../net/request'
 export default {
   name: 'AMap',
   data () {
@@ -52,7 +52,7 @@ export default {
           loadAmap().then(AMap => {
             _this.cloud = new AMap.ImageLayer({
               bounds: new AMap.Bounds([95, -2], [160, 43]),
-              url: res.data.items[0].url, // 图片 Url
+              url: head + res.data.data[0].url, // 图片 Url
               zIndex: 2,
               opacity: 0.7,
               zooms: [3, 18] // 设置可见级别，[最小级别，最大级别]
@@ -80,10 +80,11 @@ export default {
           url: '/thirdparty/tpdata/radar.do'
         }).then(res => {
           _this.cloudurl = res.data
+          // console.log(res.data.data[0].url)
           loadAmap().then(AMap => {
             _this.cloud = new AMap.ImageLayer({
               bounds: new AMap.Bounds([71.9282, 3.9079], [150.6026, 57.9079]),
-              url: res.data.items[0].url, // 图片 Url
+              url: head + res.data.data[0].url, // 图片 Url
               zIndex: 2,
               opacity: 0.7,
               zooms: [3, 18] // 设置可见级别，[最小级别，最大级别]
@@ -131,8 +132,9 @@ export default {
     height: 100%;
 }
 .btn {
-    position: absolute;
-    bottom: 20px;
-    text-align: center
+  position: absolute;
+  left: 200px;
+  bottom: 20px;
+  text-align: center
 }
 </style>

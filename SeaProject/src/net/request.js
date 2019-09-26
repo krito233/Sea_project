@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+const head = 'http://test.qdwanzhong.top/'
+
 function request (config) {
   const geturl = axios.create({
     baseURL: 'http://test.qdwanzhong.top',
@@ -8,4 +10,4 @@ function request (config) {
   return geturl(config)
 }
 
-export {request}
+export {request, head}
