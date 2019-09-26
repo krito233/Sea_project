@@ -9,6 +9,8 @@ import Homepage from '@/components/Homepage'
 Vue.use(Router)
 
 export default new Router({
+  // mode: 'history',
+  base: '/dist/',
   routes: [
     {
       path: '/',
