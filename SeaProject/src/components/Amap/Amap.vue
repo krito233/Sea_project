@@ -8,6 +8,7 @@
     <button class="yuntu" @click="showjpfubiao(0)">台湾浮标</button>
     <button class="yuntu" @click="showjpfubiao(1)">日本浮标</button>
     <button class="yuntu" @click="cleanMarker">清除浮标</button>
+    <button class="yuntu" @click="changetype">切换地图样式</button>
   </div>
 </div>
 </template>
@@ -16,6 +17,7 @@
 import {loadAmap} from './loadAmap'
 import {request, head} from '../../net/request'
 import {tw, wz, jp} from '../../assets/fubiaodata'
+// import  from 'iview/src/components/checkbox'
 export default {
   name: 'AMap',
   data () {
@@ -31,7 +33,20 @@ export default {
       cloudurl: '',
       icon: '',
       fubiaoList: [],
-      textList: []
+      textList: [],
+      maptype: true,
+      allTyphoons: [],
+      ty_pointList: [],
+      lnglat: '',
+      cir: '',
+      typhoon_img: '',
+      telist: [],
+      istyphoon: false,
+      typhoonList: [],
+      pointList: [],
+      tylist: [],
+      json: '',
+      tfbh: ''
     }
   },
   mounted () {
@@ -41,21 +56,33 @@ export default {
   },
   methods: {
     initAmap () {
+      let _this = this
       loadAmap().then(AMap => {
         console.log('地图加载成功')
-        this.myMap = new AMap.Map('allmap', {
+        _this.myMap = new AMap.Map('allmap', {
           mapStyle: 'amap://styles/b822e859c146f419a23db9748b0251f7',
           center: [120.397428, 29.90923],
           zoom: 5
         })
-        this.icon = new AMap.Icon({
+        _this.icon = new AMap.Icon({
           size: new AMap.Size(31, 45),
           image: require('../../assets/locat.png'),
           zIndex: 0,
           imageSize: new AMap.Size(31, 45)
         })
+        _this.typhoon_img = new AMap.Icon({
+          size: new AMap.Size(64, 64),
+          image: require('../../assets/typnoon_d.png'),
+          zIndex: 1,
+          imageSize: new AMap.Size(64, 64)
+        })
       }, e => {
         alert('地图加载失败' + e)
+      })
+      this.$axios.get('http://www.wztf121.com/data/complex/path.json').then(res => {
+        this.tylist = res.data
+      }).catch(e => {
+        console.log('获取失败' + e)
       })
     },
     showyun () {
@@ -142,7 +169,7 @@ export default {
       }
     },
     showwzfubiao () {
-      if (this.fubiaoList !== []){
+      if (this.fubiaoList !== []) {
         this.cleanMarker()
       }
       let _this = this
@@ -288,7 +315,7 @@ export default {
     },
     cleanMarker () {
       if (this.fubiaoList !== []) {
-        for (let i = 0; i < this.fubiaoList.length; i++){
+        for (let i = 0; i < this.fubiaoList.length; i++) {
           this.fubiaoList[i].setLabel(null)
         }
         this.myMap.remove(this.fubiaoList)
@@ -298,7 +325,316 @@ export default {
       } else {
         console.log('空')
       }
+    },
+    changetype () {
+      if (this.maptype === true) {
+        this.maptype = !this.maptype
+        loadAmap().then(AMap => {
+          this.myMap = new AMap.Map('allmap', {
+            center: [120.397428, 29.90923],
+            zoom: 5
+          })
+        })
+      } else {
+        this.maptype = !this.maptype
+        loadAmap().then(AMap => {
+          this.myMap = new AMap.Map('allmap', {
+            mapStyle: 'amap://styles/b822e859c146f419a23db9748b0251f7',
+            center: [120.397428, 29.90923],
+            zoom: 5
+          })
+        })
+      }
+    },
+    typhoon (tpbh) {
+      if (this.istyphoon === false) {
+        this.istyphoon = true
+        this.newShowTyphoon(tpbh)
+        this.tfbh = tpbh
+        // addWarnningLine
+      } else {
+        this.istyphoon = false
+        this.hideTyphoon()
+        if (this.tfbh !== tpbh) {
+          this.newShowTyphoon(tpbh)
+          this.tfbh = tpbh
+        }
+      }
+
+    },
+    newShowTyphoon (tpbh) {
+      let _this = this
+      _this.$axios.get('http://www.wztf121.com/data/complex/' + tpbh + '.json').then(res => {
+        _this.allTyphoons = res.data
+        _this.myMap.setZoom(5)
+        _this.drawLuJing(0)
+      })
+    },
+    drawLuJing (i) {
+      if (this.allTyphoons.length <= parseInt(i)) {
+        return
+      }
+      this.json = this.allTyphoons[i]
+      // console.log(json)
+      i++
+      this.drawPoint(0, i)
+    },
+    drawPoint (i, list_index) {
+      let _this = this
+      console.dir(list_index)
+      // console.log(JSON.parse(json))
+      let allTyphoonData = _this.json
+      // console.log(allTyphoonData)
+      let point = allTyphoonData.points[i]
+      // console.log(allTyphoonData.points[2].longitude)
+      // console.log(point)
+      loadAmap().then(AMap => {
+        let lnglat = new AMap.LngLat(point.longitude, point.latitude)
+        // console.log(lnglat)
+        // console.log(point.longitude)
+        let cir = new AMap.CircleMarker({
+          center: lnglat,
+          strokeColor: '#333',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: _this.getPointColor(point.strong),
+          zIndex: 100,
+          radius: 7,
+          extData: point
+        })
+        // console.dir(cir.getOptions())
+        _this.myMap.panTo(lnglat)
+        if (i === 0) {
+          // console.log(allTyphoonData.points)
+          let observeTime2 = allTyphoonData.points[0].time
+          // console.log(observeTime2)
+          // console.log(allTyphoonData.name)
+          let cont = allTyphoonData.name + '：' + observeTime2.substring(5, 7) + '月' + observeTime2.substring(8, 10) + '日' + observeTime2.substring(11, 13) + '时' + observeTime2.substring(15, 16) + '分'
+          let startText = new AMap.Text({
+            text: "<div style='font-size:12px;padding:5px 4px 5px 4px;box-shadow: 3px 3px 2px #888888;border-radius:5px;background-color:#ffffff;'>" + cont + '</div>',
+            position: lnglat,
+            zooms: [6, 18],
+            offset: new AMap.Pixel(0, -20)
+          })
+          _this.telist.push(startText)
+          _this.myMap.add(startText)
+          _this.myMap.panTo(lnglat)
+        } else {
+          let old_point = allTyphoonData.points[i - 1]
+          let old_lnglat = new AMap.LngLat(old_point.longitude, old_point.latitude)
+          let list_LngLat = [lnglat, old_lnglat]
+          let line = new AMap.Polyline({
+            path: list_LngLat,
+            zIndex: 50,
+            strokeColor: '#415bff',
+            strokeWeight: 1.5
+          })
+          _this.typhoonList.push(line)
+          _this.myMap.add(line)
+        }
+        if (i === allTyphoonData.points.length - 1) {
+          let observeTime2 = allTyphoonData.points[allTyphoonData.points.length - 1].time
+          let f_time = allTyphoonData.name + '：' + observeTime2.substring(5, 7) + '月' + observeTime2.substring(8, 10) + '日' + observeTime2.substring(11, 13) + '时' + observeTime2.substring(14, 16) + '分<br/>'
+          // cont = "<div class='typhoon_info'> <div style='height:18px;width:18px;position:absolute;right:5px;top:5px;' onclick='closeMarker()'><img src='static/images/close.png' height=100% width=100% /></div>"
+          let cont = "<div class='typhoon_info'>"
+          cont += "<div class='head'>" + f_time + '</div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>当前位置</p><p style='color:##5B3200;margin-left:10px;'>经度" + allTyphoonData.points[i].longitude + ',纬度' + allTyphoonData.points[i].latitude + '</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>中心气压</p><p style='color:##5B3200;margin-left:10px;'>" + allTyphoonData.points[i].pressure + '百帕</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>最大风速</p><p style='color:##5B3200;margin-left:10px;'>" + allTyphoonData.points[i].speed + '米/秒</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>风</p><p style='color:#aaaaaa;margin-left:26px;'>力</p><p style='color:##5B3200;margin-left:10px;'>" + allTyphoonData.points[i].power + '级</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>等</p><p style='color:#aaaaaa;margin-left:26px;'>级</p><p style='color:##5B3200;margin-left:10px;'>" + allTyphoonData.points[i].strong + '</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>移动速度</p><p style='color:##5B3200;margin-left:10px;'>" + allTyphoonData.points[i].move_speed + '米/秒</p></div>'
+          cont += '</div>'
+          let endText = new AMap.Text({
+            text: cont,
+            position: lnglat,
+            zooms: [4, 18],
+            offset: new AMap.Pixel(0, -110)
+          })
+          // map.remove(telist);
+          _this.telist.push(endText)
+          _this.myMap.add(endText)
+          // 添加终点台风图片
+          let startLngLat_1 = new AMap.LngLat(allTyphoonData.points[allTyphoonData.points.length - 1].longitude, allTyphoonData.points[allTyphoonData.points.length - 1].latitude)
+          let list_LngLat_1 = [startLngLat_1]
+          let marker = new AMap.Marker({
+            position: startLngLat_1,
+            offset: new AMap.Pixel(-30, -30),
+            icon: _this.typhoon_img, // 添加 Icon 实例
+            // cont: "<img src='../../assets/typnoon_d.png' height=60px width=60px class='fc'/>",
+            zIndex: -1,
+            clickable: true,
+            extData: allTyphoonData.points[allTyphoonData.points.length - 1]
+          })
+          marker.on('click', function (e) {
+            _this.myMap.remove(_this.telist)
+            _this.telist.push(endText)
+            _this.myMap.add(endText)
+          })
+          console.dir(marker.getzIndex())
+          _this.pointList.push(marker)
+          _this.myMap.add(marker)
+          marker.setzIndex(1)
+        }
+        _this.ty_pointList.push(lnglat)
+        cir.on('click', function () {
+          let jo = this.getExtData()
+          // console.log(jo)
+          let o_time = jo.time.substring(5, 7) + '月' + jo.time.substring(8, 10) + '日' + jo.time.substring(11, 13) + '时' + jo.time.substring(14, 16) + '分'
+          let cont = "<div class='typhoon_info'>"
+          cont += "<div class='head'>" + o_time + '</div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>当前位置</p><p style='color:##5B3200;margin-left:10px;'>经度" + jo.longitude + ',纬度' + jo.latitude + '</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>中心气压</p><p style='color:##5B3200;margin-left:10px;'>" + jo.pressure + '百帕</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>最大风速</p><p style='color:##5B3200;margin-left:10px;'>" + jo.speed + '米/秒</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>风</p><p style='color:#aaaaaa;margin-left:26px;'>力</p><p style='color:##5B3200;margin-left:10px;'>" + jo.power + '级</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>等</p><p style='color:#aaaaaa;margin-left:26px;'>级</p><p style='color:##5B3200;margin-left:10px;'>" + jo.strong + '</p></div>'
+          cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>移动速度</p><p style='color:##5B3200;margin-left:10px;'>" + jo.move_speed + '米/秒</p></div>'
+          cont += '</div>'
+          let te = new AMap.Text({
+            text: cont,
+            position: new AMap.LngLat(jo.longitude, jo.latitude),
+            offset: new AMap.Pixel(0, -130)
+          })
+          _this.myMap.remove(_this.telist)
+          _this.telist.push(te)
+          _this.myMap.add(te)
+        })
+        _this.pointList.push(cir)
+        _this.myMap.add(cir)
+        i++
+        if (i === allTyphoonData.points.length) {
+          _this.forcastPoint(allTyphoonData)
+          setTimeout(() => {
+            _this.drawLuJing(list_index)
+          }, 1000)
+          return
+        }
+        setTimeout(() => { _this.drawPoint(i, list_index) }, 25)
+      })
+    },
+    forcastPoint (json) {
+      let for_num = 1
+      let _this = this
+      if (json.points.length < 2) {
+        for_num = json.points.length
+      }
+      loadAmap().then(AMap => {
+        for (let ten = 1; ten <= for_num; ten++) {
+          let forecast = json.points[json.points.length - ten].forecast
+          if (forecast === null) {
+            forecast = []
+          }
+          let startLngLat = new AMap.LngLat(json.points[json.points.length - ten].longitude, json.points[json.points.length - ten].latitude)
+          let list_LngLat = [startLngLat]
+          for (let i = 0; i < forecast.length; i++) {
+            console.log(forecast.length)
+            for (let j = 1; j < forecast[i].points.length; j++) {
+              let point = forecast[i].points[j]
+              console.log(forecast[i].sets)
+              let lnglat = new AMap.LngLat(point.longitude, point.latitude)
+              let cir = new AMap.CircleMarker({
+                center: lnglat,
+                strokeColor: '#333', // getPointColor(point.strong),
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: _this.getPointColor(point.strong),
+                zIndex: 100,
+                radius: 7,
+                extData: point
+              })
+              cir.on('click', function () {
+                let jo = this.getExtData()
+                _this.myMap.panTo(new AMap.LngLat(jo.longitude, jo.latitude))
+                let o_time = '预报:' + jo.time.substring(5, 7) + '月' + jo.time.substring(8, 10) + '日' + jo.time.substring(11, 13) + '时' + jo.time.substring(14, 16) + '分'
+                let cont = "<div class='typhoon_info'>"
+                cont += "<div class='head'>" + o_time + '</div>'
+                cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>当前位置</p><p style='color:##5B3200;margin-left:10px;'>经度" + jo.longitude + ',纬度' + jo.latitude + '</p></div>'
+                // cont+="<div style='width:180px;margin-left:10px;height:1px;background-color:#E5E5E5;padding:0;'></div>";
+                cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>中心气压</p><p style='color:##5B3200;margin-left:10px;'>" + (jo.pressure || '--') + '百帕</p></div>'
+                // cont+="<div style='width:180px;margin-left:10px;height:1px;background-color:#E5E5E5;padding:0;'></div>";
+                cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>最大风速</p><p style='color:##5B3200;margin-left:10px;'>" + (jo.speed || '--') + '米/秒</p></div>'
+                cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>风</p><p style='color:#aaaaaa;margin-left:26px;'>力</p><p style='color:##5B3200;margin-left:10px;'>" + (jo.power || '--') + '级</p></div>'
+                cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>等</p><p style='color:#aaaaaa;margin-left:26px;'>级</p><p style='color:##5B3200;margin-left:10px;'>" + (jo.strong || '--') + '</p></div>'
+                cont += "<div style='display:flex;border-bottom:1px solid #E5E5E5;'><p style='color:#aaaaaa;margin-left:10px;'>移动速度</p><p style='color:##5B3200;margin-left:10px;'>" + (jo.move_speed || '--') + '米/秒</p></div>'
+                cont += '</div>'
+                let te = new AMap.Text({
+                  text: cont,
+                  position: new AMap.LngLat(jo.longitude, jo.latitude),
+                  offset: new AMap.Pixel(0, -130)
+                })
+                _this.myMap.remove(_this.telist)
+                _this.telist.push(te)
+                _this.myMap.add(te)
+              })
+
+              _this.pointList.push(cir)
+              list_LngLat.push(new AMap.LngLat(point.longitude, point.latitude))
+              _this.myMap.add(cir)
+            }
+
+            let line = new AMap.Polyline({
+              path: list_LngLat,
+              zIndex: 50,
+              strokeStyle: 'dashed',
+              strokeColor: _this.getForcastColor(forecast[i].sets),
+              strokeWeight: 2
+            })
+            list_LngLat = [startLngLat]
+            _this.typhoonList.push(line)
+            _this.myMap.add(line)
+          }
+        }
+      })
+    },
+    hideTyphoon () {
+      this.myMap.remove(this.pointList)
+      this.myMap.remove(this.typhoonList)
+      this.myMap.remove(this.telist)
+      this.telist = []
+      this.pointList = []
+      this.typhoonList = []
+    },
+    getPointColor (strong) {
+      switch (strong) {
+        case '热带低压(TD)':
+          return '#30FC31'
+        case '热带风暴(TS)':
+          return '#307EFA'
+        case '强热带风暴(STS)':
+          return '#FAF82F'
+        case '台风(TY)':
+          return '#FABA31'
+        case '强台风(STY)':
+          return '#F08BF4'
+        case '超强台风(Super TY)':
+          return '#FA3031'
+        default:
+          return '#FFFFFF'
+      }
+    },
+    getForcastColor (jigou) {
+      switch (jigou) {
+        case '中国':
+          return '#D23441'
+        case '美国':
+          return '#E844F1'
+        case '日本':
+          return '#78A848'
+        case '中国香港':
+          return '#7CE3D6'
+        case '中国台湾':
+          return '#E2E3B0'
+        case '韩国':
+          return '#6A9895'
+        case '欧洲':
+          return '#2D53A8'
+        default:
+          return '#FFFFFF'
+      }
     }
+    // closeMarker () {
+    //   this.myMap.remove(this.telist)
+    // }
   }
 }
 </script>
@@ -320,5 +656,22 @@ export default {
   bottom: 20px;
   text-align: center
 }
+.typhoon_info{
+  box-shadow:3px 3px 2px #888888;
+  width:230px;
+  height:auto;
+  border-radius:10px;
+  background-color:#ffffff;
 
+}
+.typhoon_info>.head{
+  padding:8px 0px 8px 0px;border-top-right-radius:10px;border-top-left-radius:10px;background-color:#AADAFF;color:#333333;width:100%;font-size:15px;text-align:center;
+}
+.typhoon_info>div{
+  padding:5px 0px 5px 0px;width:100%;
+}
+.typhoon_info>div>p{
+  margin:0;
+  font-size:13px;
+}
 </style>

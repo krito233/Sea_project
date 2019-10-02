@@ -10,4 +10,13 @@ function request (config) {
   return geturl(config)
 }
 
-export {request, head}
+function getimg (config) {
+  request(config).then(res => {
+    console.log(res.data)
+    return res.data
+  }).catch(e => {
+    console.log('获取失败' + e)
+  })
+}
+
+export {request, head, getimg}

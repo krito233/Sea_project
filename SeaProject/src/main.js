@@ -4,6 +4,10 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Axios from 'Axios'
+import iView from 'iview'
+import 'iview/dist/styles/iview.css'
+
+Vue.use(iView)
 
 Vue.config.productionTip = false
 Axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
