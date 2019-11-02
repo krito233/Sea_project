@@ -1,15 +1,13 @@
 <template>
 <div class="container">
     <div id="allmap"></div>
-  <div class="btn">
-    <button class="yuntu" @click="showyun">云图</button>
-    <button class="yuntu" @click="showrader">雷达图</button>
-    <button class="yuntu" @click="showwzfubiao">温州浮标</button>
-    <button class="yuntu" @click="showjpfubiao(0)">台湾浮标</button>
-    <button class="yuntu" @click="showjpfubiao(1)">日本浮标</button>
-    <button class="yuntu" @click="cleanMarker">清除浮标</button>
-    <button class="yuntu" @click="changetype">切换地图样式</button>
+  <p v-if="iscloud" class="radartit">{{time}}</p>
+  <p v-if="israder" class="radartit">{{time}}</p>
+  <div class="zuo">
+    <img v-if="istuli" class="tuli" src="../../assets/tuli.png"/>
+    <p class="copyright">青岛海之声科技有限公司技术服务</p>
   </div>
+
 </div>
 </template>
 
@@ -17,9 +15,15 @@
 import {loadAmap} from './loadAmap'
 import {request, head} from '../../net/request'
 import {tw, wz, jp} from '../../assets/fubiaodata'
+import chart1 from '../chart1'
+import echarts from 'echarts'
 // import  from 'iview/src/components/checkbox'
+
 export default {
   name: 'AMap',
+  components: {
+    chart1
+  },
   data () {
     return {
       ak: '',
@@ -46,7 +50,14 @@ export default {
       pointList: [],
       tylist: [],
       json: '',
-      tfbh: ''
+      tfbh: '',
+      time: '',
+      fubiaotype: '',
+      istuli: false,
+      dataList: [[]],
+      myChart2: '',
+      dataTList:[]
+
     }
   },
   mounted () {
@@ -60,15 +71,15 @@ export default {
       loadAmap().then(AMap => {
         console.log('地图加载成功')
         _this.myMap = new AMap.Map('allmap', {
-          mapStyle: 'amap://styles/b822e859c146f419a23db9748b0251f7',
+          // mapStyle: 'amap://styles/b822e859c146f419a23db9748b0251f7',
           center: [120.397428, 29.90923],
           zoom: 5
         })
         _this.icon = new AMap.Icon({
-          size: new AMap.Size(31, 45),
-          image: require('../../assets/locat.png'),
+          size: new AMap.Size(40, 40),
+          image: require('../../assets/locate.png'),
           zIndex: 0,
-          imageSize: new AMap.Size(31, 45)
+          imageSize: new AMap.Size(40, 40)
         })
         _this.typhoon_img = new AMap.Icon({
           size: new AMap.Size(64, 64),
@@ -79,7 +90,7 @@ export default {
       }, e => {
         alert('地图加载失败' + e)
       })
-      this.$axios.get('http://www.wztf121.com/data/complex/path.json').then(res => {
+      request('/thirdparty/tpdata/typhoonList.do').then(res => {
         this.tylist = res.data
       }).catch(e => {
         console.log('获取失败' + e)
@@ -97,6 +108,7 @@ export default {
           }
         }).then(res => {
           _this.cloudurl = res.data
+          _this.time = res.data.data[0].tm.substring(0, 4) + '年' + res.data.data[0].tm.substring(5, 7) + '月' + res.data.data[0].tm.substring(8, 10) + '日' + res.data.data[0].tm.substring(11, 17) + '云图'
           loadAmap().then(AMap => {
             _this.cloud = new AMap.ImageLayer({
               bounds: new AMap.Bounds([95, -2], [160, 43]),
@@ -132,6 +144,7 @@ export default {
           }
         }).then(res => {
           _this.cloudurl = res.data
+          _this.time = res.data.data[0].tm.substring(0, 4) + '年' + res.data.data[0].tm.substring(5, 7) + '月' + res.data.data[0].tm.substring(8, 10) + '日' + res.data.data[0].tm.substring(11, 17) + '雷达图'
           // console.log(res.data.data[0].url)
           loadAmap().then(AMap => {
             _this.cloud = new AMap.ImageLayer({
@@ -172,6 +185,11 @@ export default {
       if (this.fubiaoList !== []) {
         this.cleanMarker()
       }
+      // if (this.fubiaotype === 'wz') {
+      //   this.fubiaotype = ''
+      //   return
+      // }
+      this.fubiaotype = 'wz'
       let _this = this
       let list = this.wz
       request({
@@ -184,7 +202,7 @@ export default {
             let data = {job: job, index: i}
             let marker = new AMap.Marker({
               position: new AMap.LngLat(job.pos[0], job.pos[1]),
-              offset: new AMap.Pixel(-15.5, -45),
+              offset: new AMap.Pixel(-20, -40),
               icon: _this.icon, // 添加 Icon 实例
               title: job.stnm,
               zIndex: 3,
@@ -193,6 +211,26 @@ export default {
               extData: data
             })
             marker.on('click', function () {
+              let this_=_this
+              request({
+                url: '/thirdparty/tpdata/wz.do',
+                params:{day:2}
+              }).then(res2 => {
+                this_.dataList= null
+                this_.dataList= []
+                for (let x=0;x<res2.data.data[i].data.length;x++){
+                  this_.dataList[x] = []
+                  this_.dataList[x][0]=x
+                  if(res2.data.data[i].data[x].val==='-'){
+                    this_.dataList[x][1]=""
+                  }else {
+                    this_.dataList[x][1]=eval(res2.data.data[i].data[x].val)
+                  }
+                  this_.dataTList[x]=res2.data.data[i].data[x].tm
+                }
+                console.log(this_.dataList)
+                this_.drawHistory(2)
+              })
               for (let j = 0; j < _this.fubiaoList.length; j++) {
                 _this.fubiaoList[j].setLabel(null)
                 _this.fubiaoList[j].setzIndex(1)
@@ -200,10 +238,11 @@ export default {
               this.setzIndex(500)
               // let index = this.getExtData().index
               marker.setLabel({
-                offset: new AMap.Pixel(86, 147), // 设置文本标注偏移量
+                offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
                 content: '<div class="fubiao_info">' +
                   // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                  '<p>当前潮位值：' + res.data.data[i].data[0].val + '</p><p>该点警戒值：' + res.data.data[i].data[0].wrz + '</p><p>时间：' + res.data.data[i].data[0].tm + '</p></div>', // 设置文本标注内容
+                  '<p>当前潮位值：' + res.data.data[i].data[0].val + '</p>' +
+                  '<p>该点警戒值：' + res.data.data[i].data[0].wrz + '</p><p>时间：' + res.data.data[i].data[0].tm + '</p></div><div id="container2" class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
                 direction: 'top',
                 zIndex: 500
               })
@@ -211,16 +250,17 @@ export default {
             let text = new AMap.Text({
               text: job.stnm,
               position: new AMap.LngLat(job.pos[0], job.pos[1]),
-              offset: new AMap.Pixel(-15.5, 10),
+              offset: new AMap.Pixel(0, -50),
               zooms: [5, 18],
               zIndex: 500
             })
             text.setStyle({
               'font-size': '12px',
-              'color': '#fff',
+              'color': '#5C3300',
               'font-weight': 'bold',
-              'background': '#000000',
-              'border': '1px solid #fff'
+              'background': 'rgba(0,0,0,0)',
+              'border': '0',
+              'border-radius': '0'
             })
             _this.myMap.add(text)
             _this.textList.push(text)
@@ -228,6 +268,7 @@ export default {
           }
           _this.myMap.add(_this.textList)
           _this.myMap.add(_this.fubiaoList)
+          _this.myMap.setZoomAndCenter(6, new AMap.LngLat(124.1028, 24.3653))
         })
       }).catch(e => {
         console.log('获取失败' + e)
@@ -235,18 +276,50 @@ export default {
     },
     showjpfubiao (flag) {
       this.cleanMarker()
+      // if (flag === 0 && this.fubiaotype === 'tw') {
+      //   this.fubiaotype = ''
+      //   return
+      // }
+      // if (flag === 1 && this.fubiaotype === 'jp') {
+      //   this.fubiaotype = ''
+      //   return
+      // }
       let _this = this
       let list = ''
       let url = '/thirdparty/tpdata/fb.do'
       if (flag === 0) {
         list = this.tw
+        this.fubiaotype = 'tw'
       } else {
+        this.fubiaotype = 'jp'
         list = this.jp
       }
       request({
         url: url
       }).then(res => {
         console.log('获取成功')
+        console.log(res.data.jpn.data[0].items[0].lx.length)
+        console.log(res.data.jpn.data[0].items[0].lx[0])
+        // if (flag !== 0) {
+        //   for (let i = 0; i < res.data.jpn.data.length; i++) {
+        //     let str = []
+        //     for (let j = 0; j < res.data.jpn.data[i].items[0].lx.length; j++) {
+        //       let char = res.data.jpn.data[i].items[0].lx[j]
+        //       if (char === 'N') {
+        //         str[j] = '北'
+        //       } else if (char === 'S') {
+        //         str[j] = '南'
+        //       } else if (char === 'E') {
+        //         str[j] = '东'
+        //       } else if (char === 'W') {
+        //         str[j] = '西'
+        //       }
+        //     }
+        //     // console.log(str.join(''))
+        //     res.data.jpn.data[i].items[0].lx = str.join('')
+        //     // console.log(res.data.jpn.data.items[0].lx.length)
+        //   }
+        // }
         loadAmap().then(AMap => {
           for (let i = 0; i < list.length; i++) {
             let job = list[i]
@@ -269,38 +342,73 @@ export default {
               this.setzIndex(500)
               // let index = this.getExtData().index
               if (flag === 0) {
+                let this_=_this
+                request({
+                  url: '/thirdparty/tpdata/fb.do',
+                  params:{day:2}
+                }).then(res2 => {
+                  // console.log(res2.data.tw.data[i].items)
+                  this_.dataList= null
+                  this_.dataList= []
+                  for (let x=0;x<res2.data.tw.data[i].items.length;x++){
+                    this_.dataList[x] = []
+                    this_.dataList[x][0]=x
+                    if(res2.data.tw.data[i].items[x].lg==='-'){
+                      this_.dataList[x][1]=""
+                    }else {
+                      this_.dataList[x][1]=eval(res2.data.tw.data[i].items[x].lg)
+                    }
+                    this_.dataTList[x]=res2.data.tw.data[i].items[x].tm
+                  }
+                   console.log(this_.dataList)
+                  this_.drawHistory(3)
+                })
                 marker.setLabel({
-                  offset: new AMap.Pixel(86, 147), // 设置文本标注偏移量
+                  offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
                   content: '<div class="fubiao_info2" style="padding: 5px 5px;">' +
                     // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                    '<p>波浪周期：' + res.data.tw.data[i].items[0].blzq + '</p><p>浪高：' + res.data.tw.data[i].items[0].lg + '</p><p>浪向：' + res.data.tw.data[i].items[0].lx + '</p><p>时间：' + res.data.tw.data[i].items[0].tm + '</p></div>', // 设置文本标注内容
+                    '<p>波浪周期：' + res.data.tw.data[i].items[0].blzq + '</p><p>浪高：' + res.data.tw.data[i].items[0].lg + '</p><p>浪向：' + res.data.tw.data[i].items[0].lx + '</p><p>时间：' + res.data.tw.data[i].items[0].tm + '</p></div><div id="container3"  class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
                   direction: 'top',
                   zIndex: 500
                 })
               } else {
-                marker.setLabel({
-                  offset: new AMap.Pixel(86, 147), // 设置文本标注偏移量
+                request({
+                  url: '/thirdparty/tpdata/getPic.do',
+                  params: {
+                    type: 'jpn',
+                    kind: 0,
+                    stcd: res.data.jpn.data[i].stcd
+                  }
+                }).then(ans => {
+                  console.log(ans)
+                  marker.setLabel({
+                  offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
                   content: '<div class="fubiao_info2">' +
                     // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                    '<p>波浪周期：' + res.data.jpn.data[i].items[0].blzq + '</p><p>浪高：' + res.data.jpn.data[i].items[0].lg + '</p><p>浪向：' + res.data.jpn.data[i].items[0].lx + '</p><p>时间：' + res.data.jpn.data[i].items[0].tm + '</p></div>', // 设置文本标注内容
+                    '<p>波浪周期：' + res.data.jpn.data[i].items[0].blzq + '</p><p>浪高：' + res.data.jpn.data[i].items[0].lg + '</p><p>浪向：' + res.data.jpn.data[i].items[0].lx + '</p><p>时间：' + res.data.jpn.data[i].items[0].tm + '</p><img style="width: 100%;" src="'+ head + ans.data.data[0].url  + '"></div>', // 设置文本标注内容
                   direction: 'top',
                   zIndex: 500
                 })
+                }).catch(e => {
+                  console.log('获取失败' + e)
+                })
+
               }
             })
             let text = new AMap.Text({
               text: job.stnm,
               position: new AMap.LngLat(job.pos[0], job.pos[1]),
-              offset: new AMap.Pixel(-15.5, 10),
+              offset: new AMap.Pixel(0, -50),
               zooms: [5, 18],
               zIndex: 500
             })
             text.setStyle({
               'font-size': '12px',
-              'color': '#fff',
+              'color': '#5C3300',
               'font-weight': 'bold',
-              'background': '#000000',
-              'border': '1px solid #fff'
+              'background': 'rgba(0,0,0,0)',
+              'border': '0',
+              'border-radius': '0'
             })
             _this.myMap.add(text)
             _this.textList.push(text)
@@ -308,6 +416,7 @@ export default {
           }
           _this.myMap.add(_this.textList)
           _this.myMap.add(_this.fubiaoList)
+          _this.myMap.setZoomAndCenter(6, new AMap.LngLat(124.1028, 24.3653))
         })
       }).catch(e => {
         console.log('获取失败' + e)
@@ -325,6 +434,42 @@ export default {
       } else {
         console.log('空')
       }
+    },
+    drawHistory(k){
+      let this_= this
+      console.log('233')
+      if(k===2){
+        this.myChart2 = echarts.init(document.getElementById('container2'))
+      }
+      else {
+        this.myChart2 = echarts.init(document.getElementById('container3'))
+      }
+      this.myChart2.setOption({
+        xAxis: {
+          type: 'category',
+          data: this_.dataTList
+        },
+        yAxis: {
+          type: 'value'
+        },
+        grid: {
+          left: '10%',
+          right: '5%',
+          top: '5%',
+          bottom: '5%'
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: function (params) {
+            var dataIndex = params.dataIndex
+              return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + params[0].value[1] + '米'
+          }
+        },
+        series: [{
+          data: this_.dataList,
+          type: 'line'
+        }]
+      })
     },
     changetype () {
       if (this.maptype === true) {
@@ -347,25 +492,31 @@ export default {
       }
     },
     typhoon (tpbh) {
+      console.log(this.istyphoon)
       if (this.istyphoon === false) {
         this.istyphoon = true
         this.newShowTyphoon(tpbh)
         this.tfbh = tpbh
-        // addWarnningLine
       } else {
         this.istyphoon = false
-        this.hideTyphoon()
+        // this.hideTyphoon()
         if (this.tfbh !== tpbh) {
+          this.istyphoon = true
           this.newShowTyphoon(tpbh)
           this.tfbh = tpbh
         }
       }
-
     },
     newShowTyphoon (tpbh) {
       let _this = this
-      _this.$axios.get('http://www.wztf121.com/data/complex/' + tpbh + '.json').then(res => {
-        _this.allTyphoons = res.data
+      request({
+        url: '/thirdparty/tpdata/typhoonPath.do',
+        params: {
+          id: tpbh
+        }
+      }).then(res => {
+        _this.allTyphoons = res.data.data
+        console.log(res.data)
         _this.myMap.setZoom(5)
         _this.drawLuJing(0)
       })
@@ -381,7 +532,7 @@ export default {
     },
     drawPoint (i, list_index) {
       let _this = this
-      console.dir(list_index)
+      // console.dir(list_index)
       // console.log(JSON.parse(json))
       let allTyphoonData = _this.json
       // console.log(allTyphoonData)
@@ -527,10 +678,10 @@ export default {
           let startLngLat = new AMap.LngLat(json.points[json.points.length - ten].longitude, json.points[json.points.length - ten].latitude)
           let list_LngLat = [startLngLat]
           for (let i = 0; i < forecast.length; i++) {
-            console.log(forecast.length)
+            // console.log(forecast.length)
             for (let j = 1; j < forecast[i].points.length; j++) {
               let point = forecast[i].points[j]
-              console.log(forecast[i].sets)
+              // console.log(forecast[i].sets)
               let lnglat = new AMap.LngLat(point.longitude, point.latitude)
               let cir = new AMap.CircleMarker({
                 center: lnglat,
@@ -587,6 +738,7 @@ export default {
       })
     },
     hideTyphoon () {
+      this.istyphoon = false
       this.myMap.remove(this.pointList)
       this.myMap.remove(this.typhoonList)
       this.myMap.remove(this.telist)
@@ -631,6 +783,12 @@ export default {
         default:
           return '#FFFFFF'
       }
+    },
+    showtuli () {
+      this.istuli = !this.istuli
+    },
+    changetuli (flag) {
+      this.istuli = flag
     }
     // closeMarker () {
     //   this.myMap.remove(this.telist)
@@ -641,14 +799,24 @@ export default {
 
 <style scoped>
 .container {
-    width: 100%;
-    height: 100vh;
+    width: 85%;
+    height: 88vh;
+    top: 10vh;
+    left: 14%;
     position: relative;
+  background: linear-gradient(135deg, transparent $tl, $bg 0) top left;
   /*text-align: center;*/
 }
 #allmap {
     width: 100%;
     height: 100%;
+}
+.radartit {
+  position: absolute;
+  font-size: 1.2rem;
+  top: 10px;
+  right: 20px;
+  z-index: 0;
 }
 .btn {
   position: absolute;
@@ -662,7 +830,6 @@ export default {
   height:auto;
   border-radius:10px;
   background-color:#ffffff;
-
 }
 .typhoon_info>.head{
   padding:8px 0px 8px 0px;border-top-right-radius:10px;border-top-left-radius:10px;background-color:#AADAFF;color:#333333;width:100%;font-size:15px;text-align:center;
@@ -673,5 +840,20 @@ export default {
 .typhoon_info>div>p{
   margin:0;
   font-size:13px;
+}
+.copyright {
+  background-color: #fff;
+}
+.tuli {
+  width: 14rem;
+}
+.zuo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.chartClass{
+  width: 100%;
+  height: 100%;
 }
 </style>

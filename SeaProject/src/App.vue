@@ -12,8 +12,8 @@ export default {
 
 <style>
   .amap-marker-label{
-    width: 170px;
-    height: 100px;
+    width: 250px;
+    height: 300px;
     padding: 0;
     border: 1px solid #fff;
     -webkit-border-radius: 8px;

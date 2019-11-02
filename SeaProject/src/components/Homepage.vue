@@ -1,33 +1,34 @@
+<!--<script src="../../build/utils.js"></script>-->
 <template>
   <div class="main">
+    <img :class="{big:isbigger}" @dblclick="isbigger = !isbigger" v-if="isbigger" :src="imgurl">
     <div class="header">
+      <img src="../assets/logo.png" class="logo">
       <p>温州海洋环境监测中心站</p>
     </div>
     <div class="chart" v-if="isshowchart" ref="son">
-      <button class="aui_close" @click="showchart">×</button>
+      <div class="img_header"><p>近岸单元格数据预报--{{checked}}</p></div>
+      <button class="aui_close" @click="showchart(4)">×</button>
       <!--<p>海浪预报</p>-->
-      <chart1 class="cha"/>
+      <chart1 :szyb="szyb" class="cha" ref="chart1"/>
     </div>
     <div class="img" v-if="isshow">
+      <div class="img_header"></div>
       <button class="aui_close" @click="imgclose">×</button>
-      <!--<div class="img_container" v-if="imgtype==='kr'||imgtype==='jpnqy'">-->
-        <!--<p v-if="imgtype==='kr'">韩国天气图</p>-->
-        <!--<p v-if="imgtype==='jpnqy'">日本天气图</p>-->
-        <!--<img :src="imgurl" id="winimg"/>-->
-        <!--<ul class="btn_menu">-->
-          <!--<li>-->
-            <!--<button class="btn" @click="hanguoimg(3)">地面</button>-->
-          <!--</li>-->
-          <!--<li>-->
-            <!--<button class="btn" @click="hanguoimg(2)">气压500</button>-->
-          <!--</li>-->
-          <!--<li>-->
-            <!--<button class="btn" @click="hanguoimg(1)">气压700</button>-->
-          <!--</li>-->
-          <!--<li>-->
-            <!--<button class="btn" @click="hanguoimg(0)">气压800</button>-->
-          <!--</li>-->
-        <!--</ul>-->
+        <ul class="btn_menu" v-if="(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0)" style="position: absolute;left: 30px;top: 100px;z-index:500;">
+          <li>
+            <button class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
+          </li>
+          <li>
+            <button class="btn2" :class="{bactive:krheight === 3}" @click="hanguoimg(3)">850hPa</button>
+          </li>
+          <li>
+            <button class="btn2" :class="{bactive:krheight === 2}" @click="hanguoimg(2)">700hPa</button>
+          </li>
+          <li>
+            <button class="btn2" :class="{bactive:krheight === 1}" @click="hanguoimg(1)">500hPa</button>
+          </li>
+        </ul>
       <!--</div>-->
       <!--<div class="img_container" v-if="imgtype==='jpnbl'||imgtype==='cnhailang'||imgtype==='jpn'||imgtype==='twyb'||imgtype==='jpncloud'">-->
         <div class="img_container" v-if="isshow">
@@ -37,159 +38,193 @@
         <p v-if="imgtype==='jpnbl'">日本波浪图</p>
         <p v-if="imgtype==='cnhailang'">国家波浪图</p>
         <p v-if="imgtype==='twyb'">台湾天气图</p>
-        <!--<p v-if="imgtype==='kr'">日本天气图</p>-->
-        <!--<p v-if="imgtype==='kr'">国家海浪图</p>-->
-        <!--<p v-if="imgtype==='kr'">国家水温图</p>-->
         <p v-if="imgtype==='jpn'">日本海浪图</p>
-        <p v-if="imgtype==='cnwave'">国家波浪遥感图</p>
-        <!--<p v-if="imgtype==='kr'"></p>-->
-        <!--<p v-if="imgtype==='kr'">国家波浪遥感图</p>-->
-        <!--<p v-if="imgtype==='kr'">国家波浪遥感图</p>-->
-        <img :src="imgurl"/>
-        <ul class="btn_menu">
+          <p v-if="imgtype==='jpnblcz'">日本波浪传真图</p>
+          <p v-if="imgtype==='cnwave'">国家波浪遥感图</p>
+          <p v-if="imgtype==='euro'">欧洲中心</p>
+          <p v-if="imgtype==='sd'">手动获取图片</p>
+        <div class="tup" v-if="imgtype!=='sd'">
+          <ul class="tw" v-if="imgtype==='twyb'">
+            <li v-for="(pic, index) in urllist.data" v-if="index < 8" :key="index">
+              <img :src="head + pic.url"/>
+            </li>
+          </ul>
+          <p @click="beforeimg" class="tupl" v-if="imgtype!=='twyb'"></p>
+          <img v-if="imgtype!=='twyb'" @dblclick="isbigger = !isbigger" :src="imgurl"/>
+          <p @click="nextimg" class="tupr" v-if="imgtype!=='twyb'"></p>
+        </div>
+        <ul class="btn_menu" v-if="imgtype !== 'twyb'&&imgtype!=='sd'">
           <li>
             <button class="btn" @click="startimg">开始播放</button>
-            <input id="speed"/>秒
-            <button class="btn" @click="changespeed">改变速度</button>
+            <input id="speed" value="1"/>秒/页
+            <button class="btn" @click="changespeed">改动速度</button>
             <button class="btn" @click="cleanpic">结束播放</button>
           </li>
         </ul>
+        <div class="img_list" v-if="imgtype!=='twyb'&&imgtype!=='sd'">
+          <p @click="beforeimg" class="tupu"></p>
+          <ul class="yulan">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 0" v-for="(pic, index) in surf" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 1" v-for="(pic, index) in up50" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 2" v-for="(pic, index) in up70" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 3" v-for="(pic, index) in up85" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype !== 'kr'&&imgtype!=='jpnqy')||(imgtype==='kr'&&kind===1)||(imgtype==='jpnqy'&&kind===1)" v-for="(pic, index) in urllist.data" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+          </ul>
+          <p @click="nextimg" class="tupd"></p>
+        </div>
+        <div class="getdate">
+          <date ref="vdate" v-if="checked!=='韩国天气图2'&&checked!=='日本天气图2'&&checked!=='日本波浪图'&&checked!=='国家波浪图'&&checked!=='日本波浪传真图'&&checked!=='手动获取图片'&&checked!=='台湾天气图'"/>
+          <button @click="historyimg" class="btn dat" v-if="checked!=='韩国天气图2'&&checked!=='日本天气图2'&&checked!=='日本波浪图'&&checked!=='国家波浪图'&&checked!=='日本波浪传真图'&&checked!=='手动获取图片'&&checked!=='台湾天气图'">获取</button>
+        </div>
+        <div class="sdtz" v-if="imgtype==='sd'">
+            <div class="srwz"><p>请输入网址</p><input type="text" v-model="searchUrl"><button class="getImg" @click="getImg(searchUrl)">获取</button></div>
+            <img class="sstp" :src="searchUrl" :onerrοr="errorimg" alt="链接错误"/>
+          </div>
       </div>
-      <!--<div class="img_container" v-if="imgtype==='cnwave'">-->
-        <!--<img :src="imgurl"/>-->
-      <!--</div>-->
-      <!--<div class="img_container" v-if="imgtype===3">-->
-        <!--<img :src="imgurl"/>-->
-        <!--<p>韩国天气图</p>-->
-        <!--<button class="btn" @click="hanguoimg(0)">地面</button>-->
-        <!--<button class="btn" @click="hanguoimg(1)">气压500</button>-->
-        <!--<button class="btn" @click="hanguoimg(2)">气压700</button>-->
-        <!--<button class="btn" @click="hanguoimg(3)">气压800</button>-->
-      <!--</div>-->
     </div>
+    <div class="mapCorner"></div>
     <AMap class="map" ref="amap"/>
     <div class="l_part">
       <ul class="fri">
-        <li>实况数据
-          <div class="sec">
-            <ul>
-              <li @click="getimgurl('kr', 0)">韩国天气图</li>
-              <li @click="getimgurl('jpnqy', 0)">日本天气图</li>
-              <li @click="getimgurl('jpncloud', 0)">日本云图</li>
-              <li @click="yuntu">云图</li>
-              <li @click="radar">雷达图</li>
+        <li><div class="frili" @click="changemenu(1)">实况数据</div>
+          <div class="sec cebian" :class="{down:ismenu1}">
+            <ul class="">
+              <li :class="{checked:checked === '韩国天气图'}" @click="allclear(),checked='韩国天气图',getimgurl('kr', 0)">韩国天气图</li>
+              <li :class="{checked:checked === '日本天气图1'}" @click="allclear(),checked='日本天气图1',getimgurl('jpnqy', 0)">日本天气图</li>
+              <li :class="{checked:checked === '日本云图'}" @click="allclear(),checked='日本云图',getimgurl('jpncloud', 0)">日本云图</li>
+              <li :class="{checked:checked === '日本波浪传真图1'}" @click="allclear(),checked='日本波浪传真图1',getimgurl('jpnblcz', 0)">日本波浪传真图</li>
+              <li :class="{checked:checked === '云图'}" @click="yuntu">云图</li>
+              <li :class="{checked:checked === '雷达图'}" @click="radar">雷达图</li>
+              <li :class="{checked:checked === 'jp'}" @click="jpfubiao">日本浮标</li>
+              <li :class="{checked:checked === 'wz'}" @click="wzfubiao">温州实测</li>
+              <li :class="{checked:checked === 'tw'}" @click="twfubiao">台湾浮标</li>
             </ul>
           </div>
         </li>
-        <li>预报数据
-          <div class="sec">
-            <ul>
-              <!--<li @click="showimg('', 0)">韩国天气图</li>-->
-              <li @click="getimgurl('jpnbl', 1)">日本波浪图</li>
-              <li @click="getimgurl('cnhailang', 1)">国家波浪图</li>
+        <li><div class="frili" @click="changemenu(2)">预报数据</div>
+          <div class="sec cebian" :class="{down:ismenu2}">
+            <ul class="">
+              <li :class="{checked:checked === '韩国天气图2'}" @click="allclear(),checked='韩国天气图2',getimgurl('kr', 1)">韩国天气图</li>
+              <li :class="{checked:checked === '日本天气图2'}" @click="allclear(),checked='日本天气图2',getimgurl('jpnqy', 1)">日本天气图</li>
+              <li :class="{checked:checked === '日本波浪图'}" @click="allclear(),checked='日本波浪图',getimgurl('jpnbl', 1)">日本波浪图</li>
+              <li :class="{checked:checked === '国家波浪图'}" @click="allclear(),checked='国家波浪图',getimgurl('cnhailang', 1)">国家波浪图</li>
+              <li :class="{checked:checked === '日本波浪传真图'}" @click="allclear(),checked='日本波浪传真图',getimgurl('jpnblcz', 1)">日本波浪传真图</li>
             </ul>
           </div>
         </li>
-        <li>周会商
-          <div class="sec">
-            <ul>
-              <li @click="getimgurl('twyb', 0)">台湾天气图</li>
-              <li @click="getimgurl('jpnqy', 0)">日本天气图</li>
-              <li>欧洲中心</li>
+        <li><div class="frili" @click="changemenu(3)">周会商</div>
+          <div class="sec cebian" :class="{down:ismenu3}">
+            <ul class="">
+              <li :class="{checked:checked === '台湾天气图'}" @click="allclear(),checked='台湾天气图',getimgurl('twyb', 0)">台湾一周预报</li>
+              <li :class="{checked:checked === '日本天气图'}" @click="allclear(),checked='日本天气图',getimgurl('jpn', 1)">日本一周预报</li>
+              <li :class="{checked:checked === '欧洲中心'}" @click="allclear(),checked = '欧洲中心',getimgurl('euro', 0)">欧洲中心</li>
             </ul>
           </div>
         </li>
-        <li>灾害警报
-          <div class="sec">
-            <ul>
-              <li @click="getimgurl('cnwave', 1)">国家波浪遥感图</li>
-              <li @click="getimgurl('', 1)">国家海浪图</li>
-              <li @click="getimgurl('', 1)">国家水温图</li>
-              <li @click="getimgurl('jpn', 1)">日本海浪图</li>
+        <li><div class="frili" @click="changemenu(4)">灾害警报</div>
+          <div class="sec cebian" :class="{down:ismenu4}">
+            <ul class="">
+              <li :class="{checked:checked === '国家波浪遥感图'}" @click="allclear(),checked='国家波浪遥感图',getimgurl('cnwave', 0)">国家波浪遥感图</li>
+              <li :class="{checked:checked === '国家海浪图'}" @click="allclear(),checked='国家海浪图',getimgurl('cnhailang', 0)">国家海浪图</li>
+              <li :class="{checked:checked === '国家水温图'}" @click="allclear(),checked='国家水温图',getimgurl('cnsw', 0)">国家水温图</li>
+              <!--<li :class="{checked:checked === '日本天气图3'}" @click="allclear(),checked='日本天气图3',getimgurl('jpnqy', 0)">日本天气图</li>-->
+              <li :class="{checked:checked === '台风路径'}" @click="givelist">台风路径</li>
             </ul>
           </div>
         </li>
         <!--<li @click="typhoon(201918)">台风路径</li>-->
-        <li @click="showchart">近岸单元格数值预报
-          <div class="sec">
+        <li><div class="frili"  @click="changemenu(5)">近岸单元格数值预报</div>
+          <div class="sec cebian" :class="{down:ismenu5}">
+            <ul class="">
+              <li :class="{checked:checked === '海浪预报'}" @click="ybWatch(0)">海浪预报</li>
+              <li :class="{checked:checked === '海温预报'}" @click="ybWatch(1)">海温预报</li>
+              <li :class="{checked:checked === '潮汐预报'}" @click="ybWatch(2)">潮汐预报</li>
+              <!--<li :class="{checked:checked === '海浪预报'}" @click="">海浪预报</li>-->
+              <!--<li :class="{checked:checked === '海温预报'}" @click="allclear(),checked='海温预报',showchart(1)">海温预报</li>-->
+              <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
+            </ul>
+          </div>
+        </li>
+        <li><div class="frili" @click="changemenu(6)">其他</div>
+          <div class="sec cebian" :class="{down:ismenu6}">
             <ul>
-              <li>海浪预报
-                <!--<div class="sec2">-->
-                  <!--<ul>-->
-                    <!--<li @click="newline('E52')">乐清湾</li>-->
-                    <!--<li @click="newline('E53')">瓯江口海域</li>-->
-                    <!--<li @click="newline('E54')">洞头岛以东海域</li>-->
-                    <!--<li @click="newline('E55')">瑞安近岸海域</li>-->
-                    <!--<li @click="newline('E56')">平阳近岸海域</li>-->
-                    <!--<li @click="newline('E57')">苍南近岸海域</li>-->
-                    <!--<li @click="newline('E58')">南麂岛海域</li>-->
-                    <!--<li @click="newline('E59')">北麂岛海域</li>-->
-                  <!--</ul>-->
-                <!--</div>-->
-              </li>
+              <li :class="{checked:checked === '手动获取图片'}" @click="allclear(),checked='手动获取图片',winopen = true,isshow = !isshow,imgtype='sd'">手动获取图片</li>
             </ul>
           </div>
         </li>
       </ul>
     </div>
-    <div class="r_part">
-      <ul>
-        <li>
-          <img :src="hanguourl"/>
-          <div class="footer">
-            <p style="margin-left: 10px;width: 70%;">韩国天气图</p>
-            <p @click="getimgurl('kr', 0)" style="text-align: right;width: 25%;">放大></p>
-          </div>
-        </li>
-        <li>
-          <img :src="japanurl"/>
-          <div class="footer">
-            <p style="margin-left: 10px;width: 70%;">日本海浪图</p>
-            <p @click="getimgurl('jpn', 1)" style="text-align: right;width: 25%;">放大></p>
-          </div>
-        </li>
-        <li>
-          <img :src="cnurl"/>
-          <div class="footer">
-            <p style="margin-left: 10px;width: 70%;">国家波浪图</p>
-            <p @click="getimgurl('cnhailang', 1)" style="text-align: right;width: 25%;">放大></p>
-          </div>
-        </li>
-      </ul>
+    <!--<div class="r_part">-->
+      <!--<ul>-->
+        <!--<li>-->
+          <!--<img :src="hanguourl"/>-->
+          <!--<div class="footer">-->
+            <!--<p style="margin-left: 10px;width: 70%;">韩国天气图</p>-->
+            <!--<p @click="getimgurl('kr', 0)" style="text-align: right;width: 25%;">放大></p>-->
+          <!--</div>-->
+        <!--</li>-->
+        <!--<li>-->
+          <!--<img :src="japanurl"/>-->
+          <!--<div class="footer">-->
+            <!--<p style="margin-left: 10px;width: 70%;">日本海浪图</p>-->
+            <!--<p @click="getimgurl('jpn', 1)" style="text-align: right;width: 25%;">放大></p>-->
+          <!--</div>-->
+        <!--</li>-->
+        <!--<li>-->
+          <!--<img :src="cnurl"/>-->
+          <!--<div class="footer">-->
+            <!--<p style="margin-left: 10px;width: 70%;">国家波浪图</p>-->
+            <!--<p @click="getimgurl('cnhailang', 1)" style="text-align: right;width: 25%;">放大></p>-->
+          <!--</div>-->
+        <!--</li>-->
+      <!--</ul>-->
+    <!--</div>-->
+    <!--<div class="tf" style="position: absolute;top: 90px;right: 23%;z-index: 9;">-->
+      <!--<a>台风路径</a>-->
+      <!--<ul class="tf_list">-->
+        <!--<li v-for="(ty, i) in tylist" @click="typhoon(ty.tfbh)">{{ty.name}}</li>-->
+      <!--</ul>-->
+    <!--</div>-->
+    <div id="volet_clos">
+      <div id="volet" :class="{'active2':checked === '台风路径'}" style="text-align: center">
+        <span style="float: left">清除路径</span><span @click="closety" style="margin-left: 4rem;">></span>
+        <ul class="tf_list" style="text-align: left">
+          <li v-for="(ty) in tylist" :class="{sel:showlist.includes(ty.tfbh)}" @click="addlist(ty.tfbh)">&nbsp; {{ty.tfbh}} &nbsp;&nbsp;&nbsp; {{ty.name}}</li>
+        </ul>
+        <button class="sub" @click="typhoonall">完成</button>
+        <!--<a href="" class="ouvrir">台风路径</a>-->
+        <!--<a href="#volet_clos" class="fermer" aria-hidden="true">台风路径</a>-->
+      </div>
     </div>
-    <div class="tf" style="position: absolute;top: 90px;right: 23%;z-index: 9;">
-      <a>台风路径</a>
-      <ul class="tf_list">
-        <li v-for="(ty, i) in tylist" @click="typhoon(ty.tfbh)">{{ty.name}}</li>
-      </ul>
-    </div>
-    <!--<Dropdown style="margin-left: 20px">-->
-      <!--<i-button type="primary">-->
-        <!--下拉菜单-->
-        <!--<Icon type="arrow-down-b"></Icon>-->
-      <!--</i-button>-->
-      <!--<Dropdown-menu slot="list">-->
-        <!--<Dropdown-item>驴打滚</Dropdown-item>-->
-        <!--<Dropdown-item>炸酱面</Dropdown-item>-->
-        <!--<Dropdown-item disabled>豆汁儿</Dropdown-item>-->
-        <!--<Dropdown-item>冰糖葫芦</Dropdown-item>-->
-        <!--<Dropdown-item divided>北京烤鸭</Dropdown-item>-->
-      <!--</Dropdown-menu>-->
-    <!--</Dropdown>-->
   </div>
 </template>
 
 <script>
 import AMap from './Amap/Amap'
 import chart1 from './chart1'
-import {request, head} from '../net/request'
-import Dropdown from 'iview/src/components/dropdown'
+import {request, head, getimg} from '../net/request'
+import date from './date'
 export default {
   name: 'Homepage',
   components: {
     AMap,
     chart1,
-    Dropdown
+    date
   },
   data () {
     return {
@@ -209,11 +244,43 @@ export default {
       num: 0,
       speed: 2000,
       t: null,
-      tylist: []
+      tylist: [],
+      winopen: false,
+      islist: false,
+      showlist: [],
+      showlist2: [],
+      checked: '',
+      jp: false,
+      tw: false,
+      wz: false,
+      yun: false,
+      leida: false,
+      krheight: 0,
+      isbigger: false,
+      head: head,
+      imgflag: 0,
+      surf: [],
+      up50: [],
+      up70: [],
+      up85: [],
+      szyb: '',
+      // ismenu: [false, false, false, false, false],
+      ismenu1: false,
+      ismenu2: false,
+      ismenu3: false,
+      ismenu4: false,
+      ismenu5: false,
+      ismenu6: false,
+      searchUrl: '',
+      errorimg: 'this.src="../assets/404.jpg"',
+      kind: '',
+      sdate: null,
+      edate: null
     }
   },
   created () {
     this.init()
+    this.selectDate()
   },
   methods: {
     init () {
@@ -253,16 +320,61 @@ export default {
       }).catch(e => {
         console.log('获取失败' + e)
       })
-      this.$axios.get('http://www.wztf121.com/data/complex/path.json').then(res => {
-        this.tylist = res.data
+      request({
+        url: '/thirdparty/tpdata/typhoonList.do'
+      }).then(res => {
+        this.tylist = res.data.data
+        // console.log(res.data.data)
       }).catch(e => {
         console.log('获取失败' + e)
       })
     },
     hanguoimg (flag) {
+      this.cleanpic()
+      this.num = 0
+      this.krheight = flag
       this.imgurl = head + this.urllist.data[flag].url
+      this.imgflag =this.urllist.data[flag].pic_name
+      if (this.imgtype === 'kr') {
+        if (this.krheight === 0) {
+          this.imgflag = this.urllist.data[flag].pic_name
+        } else if (this.krheight === 1) {
+          this.imgflag = this.urllist.data[flag].pic_name
+        } else if (this.krheight === 2) {
+          this.imgflag = this.urllist.data[flag].pic_name
+        } else if (this.krheight === 3) {
+          this.imgflag = this.urllist.data[flag].pic_name
+        }
+      } else if (this.imgtype === 'jpnqy') {
+        // this.imgurl = head + this.urllist.data[flag].url
+        // this.imgurl = head + this.urllist.data[flag].url
+        // this.imgflag = head + this.urllist.data[flag].pic_name
+        if (this.krheight === 0) {
+          this.imgurl = head + this.surf[0].url
+          this.imgflag = this.surf[0].pic_name
+        } else if (this.krheight === 1) {
+          this.imgurl = head + this.up50[0].url
+          this.imgflag = this.up50[0].pic_name
+        } else if (this.krheight === 2) {
+          this.imgurl = head + this.up70[0].url
+          this.imgflag = this.up70[0].pic_name
+        } else if (this.krheight === 3) {
+          this.imgurl = head + this.up85[0].url
+          this.imgflag = this.up85[0].pic_name
+        }
+      }
     },
     getimgurl (type, kind) {
+      this.imgurl = ''
+      this.kind = kind
+      if (this.winopen === true) {
+        this.imgclose()
+        this.winopen = false
+      }
+      if (this.isshowchart === true) {
+        this.showchart()
+      }
+      this.winopen = true
       if (type === 'jpn') {
         request({
           url: '/thirdparty/tpdata/getPic.do',
@@ -285,8 +397,38 @@ export default {
             kind: kind
           }
         }).then(res => {
-          // this.urllist = res.data
+          this.urllist = res.data
+          this.surf = []
+          this.up50 = []
+          this.up70 = []
+          this.up85 = []
           this.showimage(type, res)
+          // console.log(res.data.data)
+          if (type === 'kr' && kind === 0) {
+            for (let i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].pic_name.substring(0, 4) === 'surf') {
+                this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'up50') {
+                this.up50.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'up70') {
+                this.up70.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'up85') {
+                this.up85.push(res.data.data[i])
+              }
+            }
+          } else if (type === 'jpnqy' && kind === 0) {
+            for (let i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].pic_name.substring(0, 3) === 'dim') {
+                this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '500') {
+                this.up50.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '700') {
+                this.up70.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '850') {
+                this.up85.push(res.data.data[i])
+              }
+            }
+          }
         }).catch(e => {
           console.log('图片获取失败' + e)
         })
@@ -294,45 +436,120 @@ export default {
     },
     showimage (type, res) {
       this.urllist = []
+      this.krheight = 0
       this.isshow = !this.isshow
       this.imgtype = type
       this.imgurl = head + res.data.data[0].url
       this.urllist = res.data
+      this.imgflag = res.data.data[0].pic_name
+      if (type === 'jpnqy' && kind === 0) {
+        this.imgurl = head + res.data.data[3].url
+        this.imgflag = res.data.data[3].pic_name
+      }
     },
     typhoon (tfbh) {
       // alert('功能开发中，敬请期待！')
       this.$refs['amap'].typhoon(tfbh)
     },
-    showchart () {
+    showchart (i) {
+      if (i !== 4) {
+        this.allclear()
+      }
+      if (i === 0) {
+        this.checked = '海浪预报'
+      } else if (i === 1) {
+        this.checked = '海温预报'
+      } else if (i === 2) {
+        this.checked = '潮汐预报'
+      }
+      if (this.winopen === true) {
+        this.imgclose()
+        this.winopen = false
+      }
       this.isshowchart = !this.isshowchart
+      if (i === 4) {
+        this.checked = ''
+      }
     },
     yuntu () {
+      this.allclear()
       this.$refs['amap'].showyun()
+      // this.yun = !this.yun
+      if (this.checked !== '云图') {
+        this.checked = '云图'
+        // this.yun = !this.yun
+      } else {
+        this.checked = ''
+        // this.yun = !this.yun
+      }
     },
     radar () {
+      this.allclear()
+      // this.hidetyphoon()
+      // this.$refs['amap'].cleanMarker()
       this.$refs['amap'].showrader()
+      // this.leida = !this.leida
+      // this.yun = false
+      if (this.checked !== '雷达图') {
+        this.checked = '雷达图'
+      } else {
+        this.checked = ''
+      }
     },
     show (flag) {
       this.isshow = !this.isshow
       this.imgtype = flag
     },
     imgclose () {
+      this.cleanpic()
       this.isshow = !this.isshow
       this.num = 0
       this.speed = 2000
       this.t = null
+      this.winopen = false
+      this.checked = ''
     },
     startimg () {
       this.changepic(this.num)
     },
     changepic (i) {
-      this.imgurl = head + this.urllist.data[i].url
-      // console.log(this.urllist.data.length)
-      // console.log(this.urllist.data)
-      // console.log(i)
-      // console.log(this.imgurl)
+      let tnum = 0
+      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy')) {
+        this.imgurl = head + this.urllist.data[i].url
+        this.imgflag = this.urllist.data[i].pic_name
+        tnum = this.urllist.data.length
+      } else {
+        if (this.krheight === 0) {
+          this.imgurl = head + this.surf[i].url
+          this.imgflag = this.surf[i].pic_name
+          tnum = this.surf.length
+        } else if (this.krheight === 1) {
+          this.imgurl = head + this.up50[i].url
+          this.imgflag = this.up50[i].pic_name
+          tnum = this.up50.length
+        } else if (this.krheight === 2) {
+          this.imgurl = head + this.up70[i].url
+          this.imgflag = this.up70[i].pic_name
+          tnum = this.up70.length
+        } else if (this.krheight === 3) {
+          this.imgurl = head + this.up85[i].url
+          this.imgflag = this.up85[i].pic_name
+          tnum = this.up85.length
+        }
+      }
+      // if (this.imgtype === 'kr') {
+      //   if (this.urllist.data[i].pic_name.substring(0, 4) === 'surf') {
+      //     this.krheight = 0
+      //   } else if (this.urllist.data[i].pic_name.substring(0, 4) === 'up50') {
+      //     this.krheight = 1
+      //   } else if (this.urllist.data[i].pic_name.substring(0, 4) === 'up70') {
+      //     this.krheight = 2
+      //   } else if (this.urllist.data[i].pic_name.substring(0, 4) === 'up85') {
+      //     this.krheight = 3
+      //   }
+      // }
       this.num = i + 1
-      if (this.num === this.urllist.data.length) {
+      if (this.num === tnum) {
         this.num = 0
       }
       this.t = setTimeout(() => {
@@ -353,6 +570,336 @@ export default {
     cleanpic () {
       clearTimeout(this.t)
       this.t = null
+    },
+    hidetyphoon () {
+      if (this.checked === '台风路径') {
+        this.checked = ''
+      }
+      this.showlist = []
+      // this.islist = !this.islist
+      this.$refs['amap'].hideTyphoon()
+    },
+    wzfubiao () {
+      this.allclear()
+      this.$refs['amap'].showwzfubiao()
+      this.checked = 'wz'
+    },
+    jpfubiao () {
+      this.allclear()
+      this.$refs['amap'].showjpfubiao(1)
+      this.checked = 'jp'
+    },
+    twfubiao () {
+      this.allclear()
+      this.$refs['amap'].showjpfubiao(0)
+      this.checked = 'tw'
+    },
+    addlist (i) {
+      // this.showlist.push(i)
+      if (this.showlist.includes(i)) {
+        // includes()方法判断是否包含某一元素,返回true或false表示是否包含元素，对NaN一样有效
+        // filter()方法用于把Array的某些元素过滤掉，filter()把传入的函数依次作用于每个元素，然后根据返回值是true还是false决定保留还是丢弃该元素：生成新的数组
+        this.showlist = this.showlist.filter(function (ele) { return ele !== i })
+      } else {
+        this.showlist.push(i)
+      }
+    },
+    typhoonall () {
+      this.$refs['amap'].hideTyphoon()
+      this.showlist2 = this.showlist
+      let list = this.showlist2
+      for (let i = 0; i < list.length; i++) {
+        this.typhoon(list[i])
+        console.log('ok')
+      }
+      // this.showlist2 = []
+    },
+    beforeimg () {
+      this.cleanpic()
+      if (this.num > 0) {
+        this.num = this.num - 1
+        // this.imgurl = head + this.urllist.data[this.num].url
+        if (this.imgtype !== 'kr') {
+          this.imgurl = head + this.urllist.data[this.num].url
+          this.imgflag = this.urllist.data[this.num].pic_name
+        } else {
+          if (this.krheight === 0) {
+            this.imgurl = head + this.surf[this.num].url
+            this.imgflag = this.surf[this.num].pic_name
+          } else if (this.krheight === 1) {
+            this.imgurl = head + this.surf[this.num].url
+            this.imgflag = this.up50[this.num].pic_name
+          } else if (this.krheight === 2) {
+            this.imgurl = head + this.surf[this.num].url
+            this.imgflag = this.up70[this.num].pic_name
+          } else if (this.krheight === 3) {
+            this.imgurl = head + this.surf[this.num].url
+            this.imgflag = this.up85[this.num].pic_name
+          }
+        }
+      } else {
+        alert('已是第一张！')
+      }
+    },
+    nextimg () {
+      this.cleanpic()
+      // console.log(this.urllist.data.length)
+      // console.log(this.urllist.data)
+      let list = []
+      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy')) {
+        list = this.urllist.data
+      } else {
+        if (this.krheight === 0) {
+          list = this.surf
+        } else if (this.krheight === 1) {
+          list = this.up50
+        } else if (this.krheight === 2) {
+          list = this.up70
+        } else if (this.krheight === 3) {
+          list = this.up85
+        }
+      }
+      if (this.num < list.length - 1) {
+        this.num = this.num + 1
+        // console.log(this.num)
+        this.imgurl = head + list[this.num].url
+        this.imgflag = list[this.num].pic_name
+        // if (this.krheight === 0) {
+        //   this.imgflag = this.surf[this.num].pic_name
+        // } else if (this.krheight === 1) {
+        //   this.imgflag = this.up50[this.num].pic_name
+        // } else if (this.krheight === 2) {
+        //   this.imgflag = this.up70[this.num].pic_name
+        // } else if (this.krheight === 3) {
+        //   this.imgflag = this.up85[this.num].pic_name
+        // }
+      } else {
+        alert('已是最后一张！')
+      }
+    },
+    givelist () {
+      this.allclearx()
+      this.$refs['amap'].showtuli()
+      if (this.checked !== '台风路径') {
+        this.checked = '台风路径'
+      } else {
+        this.checked = ''
+      }
+    },
+    allclear () {
+      if (this.$refs['amap'].istuli) {
+        this.$refs['amap'].changetuli(false)
+      }
+      this.$refs['amap'].cleanMarker()
+      if (this.checked === '云图') {
+        this.$refs['amap'].showyun()
+      }
+      if (this.checked === '雷达图') {
+        this.$refs['amap'].showrader()
+      }
+      this.$refs['amap'].hideTyphoon()
+      if (this.isshowchart) {
+        this.showchart(4)
+      }
+      if (this.winopen) {
+        this.imgclose()
+      }
+    },
+    allclearx () {
+      this.$refs['amap'].cleanMarker()
+      if (this.checked === '云图') {
+        this.$refs['amap'].showyun()
+      }
+      if (this.checked === '雷达图') {
+        this.$refs['amap'].showrader()
+      }
+      this.$refs['amap'].hideTyphoon()
+      if (this.isshowchart) {
+        this.showchart(4)
+      }
+      if (this.winopen) {
+        this.imgclose()
+      }
+    },
+    clickimg (pic, index) {
+      this.imgurl = head + pic.url
+      this.imgflag = pic.pic_name
+      this.num = index
+    },
+    getdata () {
+      this.$refs['chart1'].getData()
+    },
+    hidetuli () {
+      this.$refs['amap'].showtuli()
+    },
+    closety () {
+      this.hidetyphoon()
+      this.hidetuli()
+    },
+    changemenu (i) {
+      // console.log('2333')
+      if (i === 1) {
+        this.ismenu1 = true
+        this.ismenu2 = false
+        this.ismenu3 = false
+        this.ismenu4 = false
+        this.ismenu5 = false
+        this.ismenu6 = false
+      } else if (i === 2) {
+        this.ismenu2 = true
+        this.ismenu1 = false
+        this.ismenu3 = false
+        this.ismenu4 = false
+        this.ismenu5 = false
+        this.ismenu6 = false
+      } else if (i === 3) {
+        this.ismenu3 = true
+        this.ismenu2 = false
+        this.ismenu1 = false
+        this.ismenu4 = false
+        this.ismenu5 = false
+        this.ismenu6 = false
+      } else if (i === 4) {
+        this.ismenu4 = true
+        this.ismenu2 = false
+        this.ismenu3 = false
+        this.ismenu1 = false
+        this.ismenu5 = false
+        this.ismenu6 = false
+      } else if (i === 5) {
+        this.ismenu5 = true
+        this.ismenu2 = false
+        this.ismenu3 = false
+        this.ismenu4 = false
+        this.ismenu1 = false
+        this.ismenu6 = false
+      } else if (i === 6) {
+        this.ismenu6 = true
+        this.ismenu2 = false
+        this.ismenu3 = false
+        this.ismenu4 = false
+        this.ismenu1 = false
+        this.ismenu5 = false
+      }
+      // for (let a = 0; a < 5; a++) {
+      //   console.log(this.ismenu[a])
+      //   if (a === i) {
+      //     this.ismenu[a] = true
+      //   } else {
+      //     this.ismenu[a] = false
+      //   }
+      // }
+    },
+    ybWatch (k) {
+      // this.allclear()
+      if (k === 0) {
+        this.szyb = 'hl'
+        this.checked = '海浪预报'
+      } else if (k === 1) {
+        this.szyb = 'hw'
+        this.checked = '海温预报'
+      } else if (k === 2) {
+        this.szyb = 'cx'
+        this.checked = '潮汐预报'
+      }
+      this.showchart(k)
+      this.$refs['chart1'].changeSzyb(k)
+      this.getdata()
+    },
+    historyimg () {
+      this.sdate = this.$refs['vdate'].sdate
+      this.edate = this.$refs['vdate'].edate
+      this.imgurl = ''
+      // this.kind = kind
+      // if (this.winopen === true) {
+      //   this.imgclose()
+      //   this.winopen = false
+      // }
+      // if (this.isshowchart === true) {
+      //   this.showchart()
+      // }
+      // this.winopen = true
+      if (this.imgtype === 'jpn') {
+        request({
+          url: '/thirdparty/tpdata/getPic.do',
+          params: {
+            type: this.imgtype,
+            kind: this.kind,
+            stcd: 'jp01'
+          }
+        }).then(res => {
+          // this.urllist = res.data
+          this.urllist = []
+          this.krheight = 0
+          // this.isshow = !this.isshow
+          // this.imgtype = type
+          this.imgurl = head + res.data.data[0].url
+          this.urllist = res.data
+          this.imgflag = res.data.data[0].pic_name
+          if (this.imgtype === 'jpnqy') {
+            this.imgurl = head + res.data.data[3].url
+            this.imgflag = res.data.data[3].pic_name
+          }
+        }).catch(e => {
+          console.log('图片获取失败' + e)
+        })
+      } else {
+        request({
+          url: '/thirdparty/tpdata/getPic.do',
+          params: {
+            type: this.imgtype,
+            kind: this.kind,
+            startTime: this.sdate,
+            endTime: this.edate
+          }
+        }).then(res => {
+          console.log(res)
+          this.urllist = res.data
+          this.surf = []
+          this.up50 = []
+          this.up70 = []
+          this.up85 = []
+          this.urllist = []
+          this.krheight = 0
+          // this.isshow = !this.isshow
+          // this.imgtype = type
+          this.imgurl = head + res.data.data[0].url
+          this.urllist = res.data
+          this.imgflag = res.data.data[0].pic_name
+          if (this.imgtype === 'jpnqy') {
+            this.imgurl = head + res.data.data[3].url
+            this.imgflag = res.data.data[3].pic_name
+          }
+          // console.log(res.data.data)
+          if (this.imgtype === 'kr' && this.kind === 0) {
+            for (let i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].pic_name.substring(0, 4) === 'surf') {
+                this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'up50') {
+                this.up50.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'up70') {
+                this.up70.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'up85') {
+                this.up85.push(res.data.data[i])
+              }
+            }
+          } else if (this.imgtype === 'jpnqy' && this.kind === 0) {
+            for (let i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].pic_name.substring(0, 3) === 'dim') {
+                this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '500') {
+                this.up50.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '700') {
+                this.up70.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '850') {
+                this.up85.push(res.data.data[i])
+              }
+            }
+          }
+        }).catch(e => {
+          console.log('图片获取失败' + e)
+        })
+      }
     }
   }
 }
@@ -362,54 +909,112 @@ export default {
   ul {
     list-style-type: none;
   }
+  .mapCorner{
+    width:0;
+    height:0;
+    border-color: #95a1ad white white #95a1ad;
+    border-width: 30px 30px 30px 30px;
+    z-index: 80;
+    position: absolute;
+    top: 10vh;
+    left: 14vw;
+    border-style: solid;
+    box-shadow: 5px 5px 15px #888888;
+  }
   input {
     width: 3rem;
-    height: 40px;
+    height: 20px;
     border: 1px solid #999999;
     border-radius: 4px;
     font-size: 1.3rem;
-    text-align: right;
+    text-align: center;
+    margin-left: 20px;
+  }
+  .img_header p{
+    margin-left: 2rem;
+    text-align: left;
+    font-size: 1.2rem;
+    margin-top: 1vh;
+    font-weight: bold;
+    color: #e7e6e6;
   }
 .main {
   height: 100vh;
   overflow: hidden;
   position: relative;
+  background: url('../assets/background.png') no-repeat;
+  /*height:100vh;*/
+  width:100%;
+  /*overflow:hidden;*/
+  /*position:relative;*/
+  /*background:url(../../static/img/background.6d133b5.png) ;*/
+  background-size:cover;
+}
+.logo{
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-block;
+  vertical-align:middle;
+  padding: 0 1rem;
 }
 .header {
-  width: 84%;
-  font-size: 2rem;
+  width: 50%;
+  font-size: 1rem;
+  text-align: center;
   position: absolute;
-  right: 10px;
+  top: 2vh;
+  right: 25%;
   z-index: 99;
-  text-align: left;
   padding: 0.8rem 1.3rem;
-  border: 1px solid #345eb0;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
   color: #fff;
-  background: -webkit-linear-gradient(left, #6cafe8, #6d37a4); /* Safari 5.1 - 6.0 */
-  background: -o-linear-gradient(right, #6cafe8, #6d37a4); /* Opera 11.1 - 12.0 */
-  background: -moz-linear-gradient(right, #6cafe8, #6d37a4); /* Firefox 3.6 - 15 */
-  background: linear-gradient(to right, #6cafe8, #6d37a4);
+  background: #273547;
+  -webkit-border-radius: 2rem;
+  -moz-border-radius: 2rem;
+  border-radius: 2rem;
+}
+.header:before{
+  vetical-align:middle;
+  display: inline-block;
+  vertical-align:middle;
+}
+.header p{
+  display: inline-block;
+  vertical-align:middle;
+  font-size: 20px;
+  font-weight: bold;
 }
 .l_part {
   width: 12%;
-  height: 100%;
+  /*height: 100%;*/
   /*padding-top: 230px;*/
-  margin-left: -10px;
+  margin-left: 2%;
   /*line-height: 100px;*/
-  padding-top: 5vh;
+  padding-top: 3vh;
   padding-bottom: 5vh;
-  background: -webkit-linear-gradient(#6cafe8, #6d37a4);
-  background: -o-linear-gradient(#6cafe8, #6d37a4);
-  background: -moz-linear-gradient(#6cafe8, #6d37a4);
-  background: linear-gradient(#6cafe8, #6d37a4);
   position: absolute;
   z-index: 9;
   top: 0;
   border-radius: 8px;
+  overflow: auto;
 }
+  .l_part::-webkit-scrollbar {/*滚动条整体样式*/
+    display: none;
+    margin-right: 3px;
+    width: 10px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
+    /*scrollbar-arrow-color:red;*/
+  }
+  .l_part::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.2);
+    scrollbar-arrow-color:red;
+  }
+  .l_part::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0;
+    background: rgba(0,0,0,0.1);
+  }
 .l_part ul {
   box-sizing: border-box;
   /*display: -webkit-flex;*/
@@ -419,23 +1024,30 @@ export default {
   /*-webkit-justify-content: center;*/
   /*justify-content: center;*/
   /*flex-wrap: wrap;*/
-  width: 100%;
+  width: 80%;
   height: 90vh;
-  margin-left: -10px;
-  border: 2px solid #fff;
   border-radius: 8px;
-  padding-top: 140px;
+  padding-top: 5vh;
 }
-.l_part ul li {
-  padding: 0.8rem 40px;
+.img_header{
+  width: 100%;
+  height: 5vh;
+  z-index: -10;
+  top: 0px;
+  left: 0px;
+  position: absolute;
+  background: #344e76;
+  border-radius: 10px;
+}
+.frili {
+  padding: 5px 8px;
   color: #fff;
-  font-size: 1.2rem;
+  background: rgba(0,0,0,.5);
+  font-size: 1rem;
   position: relative;
-}
-.l_part ul li:hover {
-  background-color: rgba(255,255,255,0.4);
-  border-left: 22px solid #00bfff;
-  border-radius: 8px;
+  border-radius: 2rem;
+  margin-top: 10px;
+  cursor: pointer;
 }
 .r_part {
   margin-right: 10px;
@@ -465,45 +1077,52 @@ export default {
   width: 100%;
   max-height: 25vh;
 }
-.tf a {
-  color: #fff;
-  background-color: #6cafe8;
-  border-radius: 4px;
-  border: 1px solid #000;
-  padding: 0.6rem;
-}
-.tf:hover .tf_list{
-  display: block!important;
-}
-.tf_list {
-  display: none;
-  color: #fff;
-  background-color: #6cafe8;
-  padding-top: 10px;
-}
-.tf_list li {
-  font-size: 1rem;
-  padding: 0.2rem 0.6rem;
-}
-.tf_list li:hover {
-  background-color: rgba(0,0,0,0.2);
-}
+/*.tf a {*/
+  /*color: #fff;*/
+  /*background-color: #6cafe8;*/
+  /*border-radius: 4px;*/
+  /*border: 1px solid #000;*/
+  /*padding: 0.6rem;*/
+/*}*/
+/*.tf:hover .tf_list{*/
+  /*display: block!important;*/
+/*}*/
+/*.tf_list {*/
+  /*display: none;*/
+  /*color: #fff;*/
+  /*background-color: #6cafe8;*/
+  /*padding-top: 10px;*/
+/*}*/
+/*.tf_list li {*/
+  /*font-size: 1rem;*/
+  /*padding: 0.2rem 0.6rem;*/
+/*}*/
+/*.tf_list li:hover {*/
+  /*background-color: rgba(0,0,0,0.2);*/
+/*}*/
 .footer {
   display: flex;
 }
 .chart, .img {
-  width: 100%;
-  height: 100vh;
+  width: 84%;
+  height: 84vh;
+  top: 10vh;
+  left: 13%;
   margin: auto;
   position: absolute;
-  top: 0;
-  left: 0;
+  border-radius: 10px;
+  border: 1px solid #FFF;
   z-index: 99;
   background-color: #e7e6e6;
+  padding: 20px;
+}
+.chart{
+  background-color: #fff;
 }
 .cha {
-  width: 70%;
-  max-height: 70vh;
+  width: 100%;
+  max-height: 60vh;
+  margin-top: 10vh;
 }
   .aui_close {
     width: 20px;
@@ -512,8 +1131,8 @@ export default {
     line-height: 20px;
     display: block;
     position: absolute;
-    left:10px;
-    top:10px;
+    right:50px;
+    top: 1.5vh;
     font-family: Helvetica, STHeiti,serif;
     _font-family: '\u9ed1\u4f53', 'Book Antiqua', Palatino;
     font-size: 18px;
@@ -534,76 +1153,104 @@ export default {
     width: 24px;
     height: 24px;
     line-height: 24px;
-    left:8px;
-    top:8px;
+    right:50px;
+    top:1.5vh;
     color: #FFF;
-    box-shadow: 0 1px 3px rgba(209, 40, 42, .5);
+    box-shadow: 0 1px 3px rgba(209, 40, 42,1);
     background: #d1282a;
     border-radius: 24px;
     transition: all 0.2s ease-out;
     opacity: 0.8;
   }
-  .fri li:hover .sec {
-    display: block;
-  }
   .sec {
-    display: none;
-    width: 110%;
-    position: absolute;
-    left: 100%;
-    top: 0;
-    padding-left: 20px;
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    padding: 30px 0 0;
+    margin-top: -30px;
+    border-radius: 16px 16px 8px 8px;
   }
   .sec ul {
-    font-size: 0.8rem;
+    font-size: 1rem;
     padding: 0;
     height: auto;
-    border: 1px solid #345eb0;
-    border-radius: 8px;
-    background: -webkit-linear-gradient(#6cafe8, #6d37a4);
-    background: -o-linear-gradient(#6cafe8, #6d37a4);
-    background: -moz-linear-gradient(#6cafe8, #6d37a4);
-    background: linear-gradient(#6cafe8, #6d37a4);
+    width: 100%;
+    text-align: right;
   }
   .sec ul li {
-    padding: 10px 15px
+    padding: 4px 15px;
+    color: #e7e6e6;
+    cursor:pointer
+  }
+  .sec ul li a {
+    color: #e7e6e6;
   }
   .sec ul li:first-child {
     border-top: 0;
   }
   .sec ul li:hover {
-    border-left: 4px solid #00bfff;
+    border-left: 4px solid #e7e6e6;
+    background: #283748;
+  }
+  .checked {
+    border-left: 4px solid #e7e6e6;
+    background: #283748;
   }
   .img {
-    background-color: #e7e6e6;
+    background-color: #fff;
     text-align: center;
-    padding: 20px;
+
   }
   .img p {
+    /*margin-left: 2rem;*/
+    /*text-align: left;*/
+    /*font-size: 1.2rem;*/
+    /*font-weight: bold;*/
+    /*color: #e7e6e6;*/
     margin-left: 2rem;
     text-align: left;
     font-size: 1.2rem;
+    margin-top: -1vh;
     font-weight: bold;
+    color: #e7e6e6;
   }
+  /*.img_container {*/
+    /*text-align: left;*/
+  /*}*/
   .img_container img{
-    /*text-align: center;*/
+    /*text-align: left!important;*/
     width: 60%;
     max-height: 70vh;
-    margin: 0 auto;
+    /*margin: 0 auto;*/
+    margin-top: 5vh;
+    margin-left: 15%;
   }
   .btn_menu {
-    margin-left: 2rem;
+    margin-left: 0rem;
   }
   .btn_menu li {
     padding: 1rem 0;
   }
   .btn {
-    padding: 0.7rem 1.2rem;
-    border: 1px solid #345eb0;
-    background-color: #999999;
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
+    padding: 0.2rem 1.2rem;
+    color: white;
+    background-color: #344e76;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    margin-left: 30px;
+  }
+  .btn2 {
+    padding: 8px 5px;
+    width: 7rem;
+    font-size: 1.3rem;
+    color: #fff;
+    background-color: rgba(0,0,0,.3);
+  }
+  .btn2:hover {
+    background-color: rgba(0,0,0,.8);
+  }
+  .bactive {
+    background-color: rgba(0,0,0,.8);
   }
   .sec ul li:hover .sec2 {
     display: block;
@@ -643,5 +1290,292 @@ export default {
   .typhoon_info>div>p{
     margin:0;
     font-size:13px;
+  }
+  #volet {
+    width: 165px;
+    max-height: 70vh;
+    padding: 10px;
+    background: #fff;
+    color: #fff;
+    /*display: none;*/
+    z-index: 0;
+  }
+
+  #volet a.ouvrir,
+  #volet a.fermer {
+    padding: 10px 25px;
+    background: #555;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  #volet {
+    position: absolute;
+    border-radius: 8px;
+    border: 1px solid #fff;
+    right: -272px;  /* test fixed + scroll, on retire la position top */
+    -webkit-transition: all .5s ease-in;
+    -moz-transition: all .5s ease-in;
+    transition: all .5s ease-in;
+    min-height: 400px;
+  }
+  #volet a.ouvrir,
+  #volet a.fermer {
+    position: absolute;
+    left: -79px;
+    top: 150px;
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    -moz-radius: 0 0 8px 8px;
+    border-radius: 8px 8px 0 0;
+  }
+  #volet a.fermer {
+    display: none;
+  }
+  .active2 {
+    right: 10px!important;
+    /*display: block!important;*/
+    z-index: 500;
+    -webkit-transition: all .5s ease-in!important;
+    -moz-transition: all .5s ease-in!important;
+    transition: all .5s ease-in!important;
+  }
+
+  /* code pour la fermeture */
+
+  /*#volet:target a.fermer {*/
+    /*display: block;*/
+  /*}*/
+  /*#volet:target a.ouvrir {*/
+    /*display: none;*/
+  /*}*/
+  /*#volet_clos:target #volet {*/
+    /*right: -273px;*/
+  /*}*/
+
+  /* test fixed + scroll */
+  #volet_clos {
+    position: fixed;
+    top: 80px;
+    right: 0;
+  }
+  #volet span {
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #000;
+  }
+  .tf_list {
+    overflow: auto;
+    max-height: 60vh;
+  }
+  .tf_list li {
+    color: #000;
+    font-size: 0.8rem;
+    padding: 5px 0;
+    cursor: pointer;
+  }
+  .sel:after {
+    content: '';
+    background:url("../assets/selected.png") no-repeat center;
+    display:inline-block;
+    background-size:15px;
+    width:20px;
+    height:12px;
+    margin-left: 10px;
+  }
+  .tf_list li:nth-of-type(odd) {
+    background-color: rgb(231,230,230);
+  }
+  .tf_list li:nth-of-type(even) {
+    background-color: #fff;
+  }
+  .tf_list::-webkit-scrollbar {/*滚动条整体样式*/
+    margin-right: 3px;
+    width: 10px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
+    /*scrollbar-arrow-color:red;*/
+  }
+  .tf_list::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.2);
+    scrollbar-arrow-color:red;
+  }
+  .tf_list::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0;
+    background: rgba(0,0,0,0.1);
+  }
+  .sub {
+    margin-top: 15px;
+    width: 50%;
+    color: #fff;
+    text-align: center;
+    border: 1px solid #fff;
+    border-radius: 8px;
+    background-color: rgb(157,195,230);
+    padding: 5px 8px;
+  }
+  .tupu {
+    background:url("../assets/up.png") no-repeat center;
+    background-size:3vh;
+    width:3vh;
+    height:3vh;
+    margin: 0 auto!important;
+  }
+  .tupd {
+    background:url("../assets/down.png") no-repeat center;
+    background-size:3vh;
+    width:3vh;
+    height:3vh;
+    /*margin-left: 0;*/
+    margin: 0 auto!important;
+  }
+  .tupl {
+    position: absolute;
+    top: 35vh;
+    left: 12%;
+    background:url("../assets/left.png") no-repeat center;
+    background-size:3vh;
+    width:3vh;
+    height:3vh;
+    margin: 0 auto!important;
+  }
+  .tupr {
+    position: absolute;
+    top: 35vh;
+    right: 22%;
+    background:url("../assets/right.png") no-repeat center;
+    background-size:3vh;
+    width:3vh;
+    height:3vh;
+    margin: 0 auto!important;
+  }
+  .tup {
+    max-height: 75vh;
+    text-align: left;
+    position: relative;
+  }
+  .big {
+    /*transition: all .5s linear;*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+  }
+  .img_list {
+    text-align: center;
+    width: 15%;
+    height: 75vh;
+    border: 1px solid #345eb0;
+    border-radius: 8px;
+    position: absolute;
+    top: 9vh;
+    right: 60px;
+  }
+  .img_list p{
+    text-align: center;
+    margin-left: 0;
+  }
+  .yulan {
+    height: 69vh;
+    overflow: auto;
+  }
+  .yulan::-webkit-scrollbar {
+    display: none;
+  }
+  .yulan li {
+    cursor: pointer;
+    padding-top: 15px;
+  }
+  .yulan li img {
+    margin: 0 auto;
+  }
+  .yulan li p {
+    color: #000;
+    font-size: 1rem;
+  }
+  .chosed {
+    background: #344e76;
+  }
+  .cebian {
+    display: none;
+  }
+  .down {
+    display: block!important;
+  }
+  .down ul {
+    text-align: left;
+  }
+  .tw {
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10vh auto;
+  }
+  .tw li {
+    width: 24%;
+  }
+  .tw li img{
+    width: 90%;
+  }
+  .srwz{
+    margin: 0 auto;
+    margin-top: 10vh;
+    width: 100%;
+    text-align: center;
+    height: 8vh;
+  }
+  .srwz p{
+    color: black;
+    font-size: 2rem;
+    float: left;
+    padding: 0.5vh;
+  }
+  .srwz input{
+    width: 60%;
+    float: left;
+    height: 4vh;
+    border-radius: 5px;
+  }
+  .getImg{
+    float: left;
+    width: 5vw;
+    height: 4vh;
+    cursor: pointer;
+    margin-left: 2vw;
+    color: white;
+    background-color:#207fde;
+    border-radius: 5px;
+  }
+  .sstp{
+    width: 60% !important;
+    /*maxheight: 60vh !important;*/
+    /* margin-left: 0; */
+    margin: 0 auto;
+    margin-left: 0 !important;
+    margin-top: 3vh !important;
+  }
+  .sdtz {
+    text-align: center
+  }
+  .getdate {
+    width: 50%;
+    display: flex;
+    margin: 0 auto;
+    padding: auto;
+    text-align: center;
+  }
+  .getdate div {
+    /* margin: 0 auto; */
+    cursor: pointer;
+    width: 75%;
+  }
+ .dat {
+    margin-left: 0
   }
 </style>
