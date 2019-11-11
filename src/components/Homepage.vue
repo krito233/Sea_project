@@ -15,20 +15,36 @@
     <div class="img" v-if="isshow">
       <div class="img_header"></div>
       <button class="aui_close" @click="imgclose">×</button>
-        <ul class="btn_menu" v-if="(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0)" style="position: absolute;left: 30px;top: 100px;z-index:500;">
+        <ul class="btn_menu" v-if="(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0)||imgtype==='euro'" style="position: absolute;left: 30px;top: 100px;z-index:500;">
           <li>
             <button class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
           </li>
-          <li>
-            <button class="btn2" :class="{bactive:krheight === 3}" @click="hanguoimg(3)">850hPa</button>
+          <li v-if="imgtype!=='euro'">
+            <button class="btn2" :class="{bactive:krheight === 3&&imgtype!=='euro'}" @click="hanguoimg(3)">850hPa</button>
           </li>
-          <li>
+          <li v-if="imgtype!=='euro'">
             <button class="btn2" :class="{bactive:krheight === 2}" @click="hanguoimg(2)">700hPa</button>
           </li>
           <li>
             <button class="btn2" :class="{bactive:krheight === 1}" @click="hanguoimg(1)">500hPa</button>
           </li>
         </ul>
+      <ul class="btn_menu" v-if="imgtype==='cnwave'" style="position: absolute;left: 30px;top: 100px;z-index:500;">
+        <li>
+          <button class="btn2" :class="{bactive:gjkind === 0}" @click="cnwaveimg(0)">HY2/Ascat</button>
+        </li>
+        <li>
+          <button class="btn2" :class="{bactive:gjkind === 1}" @click="cnwaveimg(1)">JASON2</button>
+        </li>
+      </ul>
+      <!--<ul class="btn_menu" v-if="imgtype==='euro'" style="position: absolute;left: 30px;top: 100px;z-index:500;">-->
+        <!--<li>-->
+          <!--<button class="btn2" :class="{bactive:gjkind === 0}" @click="cnwaveimg(0)">HY2/Ascat</button>-->
+        <!--</li>-->
+        <!--<li>-->
+          <!--<button class="btn2" :class="{bactive:gjkind === 1}" @click="cnwaveimg(1)">JASON2</button>-->
+        <!--</li>-->
+      <!--</ul>-->
       <!--</div>-->
       <!--<div class="img_container" v-if="imgtype==='jpnbl'||imgtype==='cnhailang'||imgtype==='jpn'||imgtype==='twyb'||imgtype==='jpncloud'">-->
         <div class="img_container" v-if="isshow">
@@ -69,11 +85,11 @@
         <div class="img_list" v-if="imgtype!=='twyb'&&imgtype!=='sd'">
           <p @click="beforeimg" class="tupu"></p>
           <ul class="yulan">
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 0" v-for="(pic, index) in surf" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 0" v-for="(pic, index) in surf" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
               <p>{{pic.tm}}</p>
             </li>
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 1" v-for="(pic, index) in up50" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 1" v-for="(pic, index) in up50" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
               <p>{{pic.tm}}</p>
             </li>
@@ -85,7 +101,15 @@
               <img :src="head + pic.url"/>
               <p>{{pic.tm}}</p>
             </li>
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype !== 'kr'&&imgtype!=='jpnqy')||(imgtype==='kr'&&kind===1)||(imgtype==='jpnqy'&&kind===1)" v-for="(pic, index) in urllist.data" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="imgtype==='cnwave'&&gjkind === 0" v-for="(pic, index) in Ascatlist" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="imgtype==='cnwave'&&gjkind === 1" v-for="(pic, index) in jason2list" @click="clickimg(pic,index)">
+              <img :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype!=='euro'&&imgtype !== 'kr'&&imgtype!=='jpnqy'&&imgtype!=='cnwave')||(imgtype==='kr'&&kind===1)||(imgtype==='jpnqy'&&kind===1)" v-for="(pic, index) in urllist.data" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
               <p>{{pic.tm}}</p>
             </li>
@@ -280,7 +304,10 @@ export default {
       errorimg: 'this.src="../assets/404.jpg"',
       kind: '',
       sdate: null,
-      edate: null
+      edate: null,
+      Ascatlist: [],
+      jason2list: [],
+      gjkind: 0
     }
   },
   created () {
@@ -334,6 +361,18 @@ export default {
         console.log('获取失败' + e)
       })
     },
+    cnwaveimg (flag) {
+      this.cleanpic()
+      this.num = 0
+      this.gjkind = flag
+      if (flag === 0) {
+        this.imgurl = head + this.Ascatlist[0].url
+        this.imgflag = this.Ascatlist[0].pic_name
+      } else if (flag === 1) {
+        this.imgurl = head + this.jason2list[0].url
+        this.imgflag = this.jason2list[0].pic_name
+      }
+    },
     hanguoimg (flag) {
       this.cleanpic()
       this.num = 0
@@ -367,10 +406,19 @@ export default {
           this.imgurl = head + this.up85[0].url
           this.imgflag = this.up85[0].pic_name
         }
+      } else if (this.imgtype === 'euro') {
+        if (this.krheight === 0) {
+          this.imgurl = head + this.surf[0].url
+          this.imgflag = this.surf[0].pic_name
+        } else if (this.krheight === 1) {
+          this.imgurl = head + this.up50[0].url
+          this.imgflag = this.up50[0].pic_name
+        }
       }
     },
     getimgurl (type, kind) {
       this.imgurl = ''
+      let this_ = this
       this.kind = kind
       if (this.winopen === true) {
         this.imgclose()
@@ -395,6 +443,7 @@ export default {
           console.log('图片获取失败' + e)
         })
       } else {
+        // console.log(kind)
         request({
           url: '/thirdparty/tpdata/getPic.do',
           params: {
@@ -409,7 +458,18 @@ export default {
           this.up85 = []
           this.showimage(type, res)
           // console.log(res.data.data)
+          if (type === 'cnwave') {
+            for (let i = 0; i < res.data.data.length; i++) {
+              // console.log(res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length))
+              if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length) === 't.png') {
+                this.Ascatlist.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length) === '2.png') {
+                this.jason2list.push(res.data.data[i])
+              }
+            }
+          }
           if (type === 'kr' && kind === 0) {
+            // console.log('1' + kind)
             for (let i = 0; i < res.data.data.length; i++) {
               if (res.data.data[i].pic_name.substring(0, 4) === 'surf') {
                 this.surf.push(res.data.data[i])
@@ -421,7 +481,10 @@ export default {
                 this.up85.push(res.data.data[i])
               }
             }
-          } else if (type === 'jpnqy' && kind === 0) {
+          }
+          if (type === 'jpnqy' && kind === 0) {
+            // console.log(res.data.data)
+            // console.log('2' + kind)
             for (let i = 0; i < res.data.data.length; i++) {
               if (res.data.data[i].pic_name.substring(0, 3) === 'dim') {
                 this.surf.push(res.data.data[i])
@@ -431,6 +494,15 @@ export default {
                 this.up70.push(res.data.data[i])
               } else if (res.data.data[i].pic_name.substring(0, 3) === '850') {
                 this.up85.push(res.data.data[i])
+              }
+            }
+          }
+          if (type === 'euro') {
+            for (let i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 2, res.data.data[i].pic_name.length) === 'ms') {
+                this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 2, res.data.data[i].pic_name.length) === '50') {
+                this.up50.push(res.data.data[i])
               }
             }
           }
@@ -447,9 +519,13 @@ export default {
       this.imgurl = head + res.data.data[0].url
       this.urllist = res.data
       this.imgflag = res.data.data[0].pic_name
-      if (type === 'jpnqy' && kind === 0) {
+      if (type === 'jpnqy' && this.kind === 0) {
         this.imgurl = head + res.data.data[3].url
         this.imgflag = res.data.data[3].pic_name
+      }
+      if (type === 'euro') {
+        this.imgurl = head + res.data.data[1].url
+        this.imgflag = res.data.data[1].pic_name
       }
     },
     typhoon (tfbh) {
@@ -519,10 +595,20 @@ export default {
     },
     changepic (i) {
       let tnum = 0
-      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy')) {
+      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro')) {
         this.imgurl = head + this.urllist.data[i].url
         this.imgflag = this.urllist.data[i].pic_name
         tnum = this.urllist.data.length
+      } else if (this.imgtype === 'cnwave') {
+        if (this.gjkind === 0) {
+          this.imgurl = head + this.Ascatlist[i].url
+          this.imgflag = this.Ascatlist[i].pic_name
+          tnum = this.Ascatlist.length
+        } else if (this.gjkind === 1) {
+          this.imgurl = head + this.jason2list[i].url
+          this.imgflag = this.jason2list[i].pic_name
+          tnum = this.jason2list.length
+        }
       } else {
         if (this.krheight === 0) {
           this.imgurl = head + this.surf[i].url
@@ -624,9 +710,17 @@ export default {
       if (this.num > 0) {
         this.num = this.num - 1
         // this.imgurl = head + this.urllist.data[this.num].url
-        if (this.imgtype !== 'kr') {
+        if (this.imgtype !== 'kr' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro') {
           this.imgurl = head + this.urllist.data[this.num].url
           this.imgflag = this.urllist.data[this.num].pic_name
+        } else if (this.imgtype === 'cnwave') {
+          if (this.gjkind === 0) {
+            this.imgurl = head + this.Ascatlist[this.num].url
+            this.imgflag = this.Ascatlist[this.num].pic_name
+          } else if (this.gjkind === 1) {
+            this.imgurl = head + this.jason2list[this.num].url
+            this.imgflag = this.jason2list[this.num].pic_name
+          }
         } else {
           if (this.krheight === 0) {
             this.imgurl = head + this.surf[this.num].url
@@ -651,8 +745,14 @@ export default {
       // console.log(this.urllist.data.length)
       // console.log(this.urllist.data)
       let list = []
-      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy')) {
+      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro')) {
         list = this.urllist.data
+      } else if (this.imgtype === 'cnwave') {
+        if (this.gjkind === 0) {
+          list = this.Ascatlist
+        } else if (this.gjkind === 1) {
+          list = this.jason2list
+        }
       } else {
         if (this.krheight === 0) {
           list = this.surf
