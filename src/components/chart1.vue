@@ -89,7 +89,7 @@ import echarts from 'echarts'
 import axios from 'axios'
 import index from '../router'
 // var tiptip = 1
-//var moren = 'http://test.qdwanzhong.top'
+// var moren = 'http://test.qdwanzhong.top'
 var moren = '..'
 export default {
   name: 'chart1',
@@ -181,7 +181,7 @@ export default {
           formatter: function (params) {
             var dataIndex = params.dataIndex
             if (this_.szyb === 'hl') {
-              return '时间: ' + params[0].axisValue + '<br>波高数值: ' + parseInt(params[0].value[1] * 100) / 100 + '米'
+              return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + parseInt(params[0].value[1] * 100) / 100 + '米'
             } else if (this_.szyb === 'hw') {
               return '时间: ' + params[0].axisValue + '<br>温度数值: ' + parseInt(params[0].value[1] * 10) / 10 + '℃'
             } else if (this_.szyb === 'cx') {
@@ -230,12 +230,22 @@ export default {
                 }
                 console.log(this_.todayE)
                 return tim
-              })()
+              })(),
+          name: '时间'
         },
         yAxis: {
           type: 'value',
           axisLine: {onZero: false},
-          minInterval: 0.01
+          minInterval: 0.01,
+          name: (function () {
+            if (this_.szyb === 'hl') {
+              return '浪高/米'
+            } else if (this_.szyb === 'hw') {
+              return '温度/℃'
+            } else if (this_.szyb === 'cx') {
+              return '潮位/米'
+            }
+          })()
         },
         // dataZoom: [
         //   // {
@@ -524,27 +534,6 @@ export default {
               this.data_a[i][1] = eval(res1.data.data[i].cw)
             }
           }
-          // if (res1.data.data === ''||(!res1.data.data.length===24&&res.data.data.length===24)) {
-          //   for (var i = 0; i < res.data.data.length; i++) {
-          //     this.data_a[i] = []
-          //     this.data_a[i][0] = i
-          //         if(this.szyb === 'hl') {
-          //             this.data_a[i][1] = eval(res.data.data[i].bg)
-          //         }else if (this.szyb === 'hw'){
-          //             this.data_a[i][1] = eval(res.data.data[i].temperature)
-          //         }
-          //   }
-          // } else if (res1.data.data.length===res.data.data.length) {
-          //   for (var i = 0; i < res.data.data.length; i++) {
-          //     this.data_a[i] = []
-          //     this.data_a[i][0] = i
-          //       if(this.szyb === 'hl') {
-          //           this.data_a[i][1] = eval(res1.data.data[i].bg)
-          //       }else if (this.szyb === 'hw'){
-          //           this.data_a[i][1] = eval(res1.data.data[i].temperature)
-          //       }
-          //   }
-          // }
           this.drawLine()
         })
 

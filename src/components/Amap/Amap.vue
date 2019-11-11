@@ -70,7 +70,7 @@ export default {
       dataTList: [],
       // isshowfubiao: false,
       isshowfubiaowin: false,
-      fubiaoinfo: '浮标'
+      fubiaoinfo: ''
     }
   },
   mounted () {
@@ -225,6 +225,7 @@ export default {
             })
             marker.on('click', function () {
               let this_ = _this
+              // let f = this.getExtData().index
               this_.isshowfubiaowin = !this_.isshowfubiaowin
               console.log(this.getExtData().index)
               request({
@@ -233,6 +234,8 @@ export default {
               }).then(res2 => {
                 this_.dataList = null
                 this_.dataList = []
+                this_.fubiaoinfo = res2.data.data[i].data
+                console.log(res2.data.data[i].data)
                 for (let x = 0; x < res2.data.data[i].data.length; x++) {
                   this_.dataList[x] = []
                   this_.dataList[x][0] = x
@@ -243,24 +246,24 @@ export default {
                   }
                   this_.dataTList[x] = res2.data.data[i].data[x].tm
                 }
-                console.log(this_.dataList)
+                // console.log(this_.dataList)
                 this_.drawHistory(2)
               })
               for (let j = 0; j < _this.fubiaoList.length; j++) {
-                _this.fubiaoList[j].setLabel(null)
+                // _this.fubiaoList[j].setLabel(null)
                 _this.fubiaoList[j].setzIndex(1)
               }
               this.setzIndex(500)
               // let index = this.getExtData().index
-              marker.setLabel({
-                offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
-                content: '<div class="fubiao_info">' +
-                  // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                  '<p>当前潮位值：' + res.data.data[i].data[0].val + '</p>' +
-                  '<p>该点警戒值：' + res.data.data[i].data[0].wrz + '</p><p>时间：' + res.data.data[i].data[0].tm + '</p></div><div id="container2" class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
-                direction: 'top',
-                zIndex: 500
-              })
+              // marker.setLabel({
+              //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
+              //   content: '<div class="fubiao_info">' +
+              //     // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
+              //     '<p>当前潮位值：' + res.data.data[i].data[0].val + '</p>' +
+              //     '<p>该点警戒值：' + res.data.data[i].data[0].wrz + '</p><p>时间：' + res.data.data[i].data[0].tm + '</p></div><div id="container2" class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
+              //   direction: 'top',
+              //   zIndex: 500
+              // })
             })
             let text = new AMap.Text({
               text: job.stnm,
@@ -315,26 +318,6 @@ export default {
         console.log('获取成功')
         console.log(res.data.jpn.data[0].items[0].lx.length)
         console.log(res.data.jpn.data[0].items[0].lx[0])
-        // if (flag !== 0) {
-        //   for (let i = 0; i < res.data.jpn.data.length; i++) {
-        //     let str = []
-        //     for (let j = 0; j < res.data.jpn.data[i].items[0].lx.length; j++) {
-        //       let char = res.data.jpn.data[i].items[0].lx[j]
-        //       if (char === 'N') {
-        //         str[j] = '北'
-        //       } else if (char === 'S') {
-        //         str[j] = '南'
-        //       } else if (char === 'E') {
-        //         str[j] = '东'
-        //       } else if (char === 'W') {
-        //         str[j] = '西'
-        //       }
-        //     }
-        //     // console.log(str.join(''))
-        //     res.data.jpn.data[i].items[0].lx = str.join('')
-        //     // console.log(res.data.jpn.data.items[0].lx.length)
-        //   }
-        // }
         loadAmap().then(AMap => {
           for (let i = 0; i < list.length; i++) {
             let job = list[i]
@@ -350,6 +333,7 @@ export default {
               extData: data
             })
             marker.on('click', function () {
+              _this.isshowfubiaowin = !_this.isshowfubiaowin
               for (let j = 0; j < _this.fubiaoList.length; j++) {
                 _this.fubiaoList[j].setLabel(null)
                 _this.fubiaoList[j].setzIndex(1)
@@ -365,6 +349,8 @@ export default {
                   // console.log(res2.data.tw.data[i].items)
                   this_.dataList = null
                   this_.dataList = []
+                  this_.fubiaoinfo = res2.data.tw.data[i].items
+                  console.log(res2.data.tw.data[i].items)
                   for (let x = 0; x < res2.data.tw.data[i].items.length; x++) {
                     this_.dataList[x] = []
                     this_.dataList[x][0] = x
@@ -387,6 +373,7 @@ export default {
                   zIndex: 500
                 })
               } else {
+                let this_ = this
                 request({
                   url: '/thirdparty/tpdata/getPic.do',
                   params: {
@@ -395,7 +382,9 @@ export default {
                     stcd: res.data.jpn.data[i].stcd
                   }
                 }).then(ans => {
-                  console.log(ans)
+                  // console.log(ans)
+                  this_.fubiaoinfo = res.data.jpn.data[i].items
+                  console.log(res.data.jpn.data[i].items)
                   // marker.setLabel({
                   //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
                   //   content: '<div class="fubiao_info2">' +
