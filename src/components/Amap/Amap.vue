@@ -3,6 +3,7 @@
     <div id="allmap"></div>
   <p v-if="iscloud" class="radartit">{{time}}</p>
   <p v-if="israder" class="radartit">{{time}}</p>
+  <p v-if="isshowfubiao" class="radartit">{{fubiaoinfo}}</p>
   <div class="zuo">
     <img v-if="istuli" class="tuli" src="../../assets/tuli.png"/>
     <p class="copyright">青岛海之声科技有限公司技术服务</p>
@@ -56,8 +57,9 @@ export default {
       istuli: false,
       dataList: [[]],
       myChart2: '',
-      dataTList:[]
-
+      dataTList: [],
+      isshowfubiao: false,
+      fubiaoinfo: '浮标'
     }
   },
   mounted () {
@@ -211,22 +213,23 @@ export default {
               extData: data
             })
             marker.on('click', function () {
-              let this_=_this
+              let this_ = _this
+			  _this.isshowfubiao = true
               request({
                 url: '/thirdparty/tpdata/wz.do',
-                params:{day:2}
+                params: {day: 2}
               }).then(res2 => {
-                this_.dataList= null
-                this_.dataList= []
-                for (let x=0;x<res2.data.data[i].data.length;x++){
+                this_.dataList = null
+                this_.dataList = []
+                for (let x = 0; x < res2.data.data[i].data.length; x++) {
                   this_.dataList[x] = []
-                  this_.dataList[x][0]=x
-                  if(res2.data.data[i].data[x].val==='-'){
-                    this_.dataList[x][1]=""
-                  }else {
-                    this_.dataList[x][1]=eval(res2.data.data[i].data[x].val)
+                  this_.dataList[x][0] = x
+                  if (res2.data.data[i].data[x].val === '-') {
+                    this_.dataList[x][1] = ''
+                  } else {
+                    this_.dataList[x][1] = eval(res2.data.data[i].data[x].val)
                   }
-                  this_.dataTList[x]=res2.data.data[i].data[x].tm
+                  this_.dataTList[x] = res2.data.data[i].data[x].tm
                 }
                 console.log(this_.dataList)
                 this_.drawHistory(2)
@@ -342,25 +345,25 @@ export default {
               this.setzIndex(500)
               // let index = this.getExtData().index
               if (flag === 0) {
-                let this_=_this
+                let this_ = _this
                 request({
                   url: '/thirdparty/tpdata/fb.do',
-                  params:{day:2}
+                  params: {day: 2}
                 }).then(res2 => {
                   // console.log(res2.data.tw.data[i].items)
-                  this_.dataList= null
-                  this_.dataList= []
-                  for (let x=0;x<res2.data.tw.data[i].items.length;x++){
+                  this_.dataList = null
+                  this_.dataList = []
+                  for (let x = 0; x < res2.data.tw.data[i].items.length; x++) {
                     this_.dataList[x] = []
-                    this_.dataList[x][0]=x
-                    if(res2.data.tw.data[i].items[x].lg==='-'){
-                      this_.dataList[x][1]=""
-                    }else {
-                      this_.dataList[x][1]=eval(res2.data.tw.data[i].items[x].lg)
+                    this_.dataList[x][0] = x
+                    if (res2.data.tw.data[i].items[x].lg === '-') {
+                      this_.dataList[x][1] = ''
+                    } else {
+                      this_.dataList[x][1] = eval(res2.data.tw.data[i].items[x].lg)
                     }
-                    this_.dataTList[x]=res2.data.tw.data[i].items[x].tm
+                    this_.dataTList[x] = res2.data.tw.data[i].items[x].tm
                   }
-                   console.log(this_.dataList)
+                  console.log(this_.dataList)
                   this_.drawHistory(3)
                 })
                 marker.setLabel({
@@ -382,17 +385,16 @@ export default {
                 }).then(ans => {
                   console.log(ans)
                   marker.setLabel({
-                  offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
-                  content: '<div class="fubiao_info2">' +
+                    offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
+                    content: '<div class="fubiao_info2">' +
                     // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                    '<p>波浪周期：' + res.data.jpn.data[i].items[0].blzq + '</p><p>浪高：' + res.data.jpn.data[i].items[0].lg + '</p><p>浪向：' + res.data.jpn.data[i].items[0].lx + '</p><p>时间：' + res.data.jpn.data[i].items[0].tm + '</p><img style="width: 100%;" src="'+ head + ans.data.data[0].url  + '"></div>', // 设置文本标注内容
-                  direction: 'top',
-                  zIndex: 500
-                })
+                    '<p>波浪周期：' + res.data.jpn.data[i].items[0].blzq + '</p><p>浪高：' + res.data.jpn.data[i].items[0].lg + '</p><p>浪向：' + res.data.jpn.data[i].items[0].lx + '</p><p>时间：' + res.data.jpn.data[i].items[0].tm + '</p><img style="width: 100%;" src="' + head + ans.data.data[0].url + '"></div>', // 设置文本标注内容
+                    direction: 'top',
+                    zIndex: 500
+                  })
                 }).catch(e => {
                   console.log('获取失败' + e)
                 })
-
               }
             })
             let text = new AMap.Text({
@@ -435,13 +437,12 @@ export default {
         console.log('空')
       }
     },
-    drawHistory(k){
-      let this_= this
+    drawHistory (k) {
+      let this_ = this
       console.log('233')
-      if(k===2){
+      if (k === 2) {
         this.myChart2 = echarts.init(document.getElementById('container2'))
-      }
-      else {
+      } else {
         this.myChart2 = echarts.init(document.getElementById('container3'))
       }
       this.myChart2.setOption({
@@ -462,7 +463,7 @@ export default {
           trigger: 'axis',
           formatter: function (params) {
             var dataIndex = params.dataIndex
-              return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + params[0].value[1] + '米'
+            return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + params[0].value[1] + '米'
           }
         },
         series: [{
