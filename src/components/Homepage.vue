@@ -53,6 +53,11 @@
           <img v-if="imgtype!=='twyb'" @dblclick="isbigger = !isbigger" :src="imgurl"/>
           <p @click="nextimg" class="tupr" v-if="imgtype!=='twyb'"></p>
         </div>
+          <ul class="btn_menu">
+            <li>
+              <button v-if="imgtype==='twyb'" class="btn" @click="downloadimg(urllist.data)">下载图片</button>
+            </li>
+          </ul>
         <ul class="btn_menu" v-if="imgtype !== 'twyb'&&imgtype!=='sd'">
           <li>
             <button class="btn" @click="startimg">开始播放</button>
@@ -334,7 +339,7 @@ export default {
       this.num = 0
       this.krheight = flag
       this.imgurl = head + this.urllist.data[flag].url
-      this.imgflag =this.urllist.data[flag].pic_name
+      this.imgflag = this.urllist.data[flag].pic_name
       if (this.imgtype === 'kr') {
         if (this.krheight === 0) {
           this.imgflag = this.urllist.data[flag].pic_name
@@ -899,6 +904,70 @@ export default {
         }).catch(e => {
           console.log('图片获取失败' + e)
         })
+      }
+    },
+    base64ToBlob (code) {
+      let parts = code.split(';base64,')
+      let contentType = parts[0].split(':')[1]
+      let raw = window.atob(parts[1])
+      let rawLength = raw.length
+      let uInt8Array = new Uint8Array(rawLength)
+      for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i)
+      }
+      return new Blob([uInt8Array], { type: contentType })
+    },
+    saveAsImage (imgurl, name) {
+      // let content = this.head + imgurl
+      //
+      // let aLink = document.createElement('a')
+      // let blob = this.base64ToBlob(content)
+      //
+      // let evt = document.createEvent('HTMLEvents')
+      // evt.initEvent('click', true, true)
+      // aLink.download = name
+      // aLink.href = URL.createObjectURL(blob)
+      // aLink.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }))
+      // 下载图片地址和图片名
+      let image = new Image()
+      // 解决跨域 Canvas 污染问题
+      image.setAttribute('crossOrigin', 'anonymous')
+      image.onload = function () {
+        let canvas = document.createElement('canvas')
+        canvas.width = image.width
+        canvas.height = image.height
+        let context = canvas.getContext('2d')
+        context.drawImage(image, 0, 0, image.width, image.height)
+        // fetch('http://somehost/check-permission', options).then(res => {
+        //   if (res.code === 0) {
+        //     let url = canvas.toDataURL('image/png') // 得到图片的base64编码数据
+        //     let a = document.createElement('a') // 生成一个a元素
+        //     let event = new MouseEvent('click') // 创建一个单击事件
+        //     a.download = name || 'photo' // 设置图片名称
+        //     a.href = url // 将生成的URL设置为a.href属性
+        //     a.dispatchEvent(event) // 触发a的单击事件
+        //     // var a = document.createElement('a');
+        //     // var url = res.data.url;
+        //     // var filename = 'myfile.zip';
+        //     // a.href = url;
+        //     // a.download = filename;
+        //     // a.click();
+        //   } else {
+        //     alert('You have no permission to download the file!')
+        //   }
+        // })
+        let url = canvas.toDataURL('image/png') // 得到图片的base64编码数据
+        let a = document.createElement('a') // 生成一个a元素
+        let event = new MouseEvent('click') // 创建一个单击事件
+        a.download = name || 'photo' // 设置图片名称
+        a.href = url // 将生成的URL设置为a.href属性
+        a.dispatchEvent(event) // 触发a的单击事件
+      }
+      image.src = imgurl
+    },
+    downloadimg (urllist) {
+      for (let i = 0; i < 8; i++) {
+        this.saveAsImage(this.head + urllist[i].url, urllist[i].pic_name)
       }
     }
   }

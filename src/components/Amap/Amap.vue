@@ -3,12 +3,22 @@
     <div id="allmap"></div>
   <p v-if="iscloud" class="radartit">{{time}}</p>
   <p v-if="israder" class="radartit">{{time}}</p>
-  <p v-if="isshowfubiao" class="radartit">{{fubiaoinfo}}</p>
+  <!--<p v-if="isshowfubiao" class="radartit">{{fubiaoinfo}}</p>-->
   <div class="zuo">
     <img v-if="istuli" class="tuli" src="../../assets/tuli.png"/>
     <p class="copyright">青岛海之声科技有限公司技术服务</p>
   </div>
-
+  <div id="volet_clos">
+    <div id="volet" :class="{activex:isshowfubiaowin}" style="text-align: center">
+      <!--<span style="float: left">清除路径</span><span style="margin-left: 4rem;">></span>-->
+      <!--<ul class="tf_list" style="text-align: left">-->
+        <!--<li v-for="(ty) in tylist" :class="{sel:showlist.includes(ty.tfbh)}" @click="addlist(ty.tfbh)">&nbsp; {{ty.tfbh}} &nbsp;&nbsp;&nbsp; {{ty.name}}</li>-->
+      <!--</ul>-->
+      <!--<button class="sub" @click="typhoonall">完成</button>-->
+      <!--<a href="" class="ouvrir">台风路径</a>-->
+      <!--<a href="#volet_clos" class="fermer" aria-hidden="true">台风路径</a>-->
+    </div>
+  </div>
 </div>
 </template>
 
@@ -58,7 +68,8 @@ export default {
       dataList: [[]],
       myChart2: '',
       dataTList: [],
-      isshowfubiao: false,
+      // isshowfubiao: false,
+      isshowfubiaowin: false,
       fubiaoinfo: '浮标'
     }
   },
@@ -214,7 +225,8 @@ export default {
             })
             marker.on('click', function () {
               let this_ = _this
-			  _this.isshowfubiao = true
+              this_.isshowfubiaowin = !this_.isshowfubiaowin
+              console.log(this.getExtData().index)
               request({
                 url: '/thirdparty/tpdata/wz.do',
                 params: {day: 2}
@@ -384,14 +396,14 @@ export default {
                   }
                 }).then(ans => {
                   console.log(ans)
-                  marker.setLabel({
-                    offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
-                    content: '<div class="fubiao_info2">' +
-                    // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                    '<p>波浪周期：' + res.data.jpn.data[i].items[0].blzq + '</p><p>浪高：' + res.data.jpn.data[i].items[0].lg + '</p><p>浪向：' + res.data.jpn.data[i].items[0].lx + '</p><p>时间：' + res.data.jpn.data[i].items[0].tm + '</p><img style="width: 100%;" src="' + head + ans.data.data[0].url + '"></div>', // 设置文本标注内容
-                    direction: 'top',
-                    zIndex: 500
-                  })
+                  // marker.setLabel({
+                  //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
+                  //   content: '<div class="fubiao_info2">' +
+                  //   // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
+                  //   '<p>波浪周期：' + res.data.jpn.data[i].items[0].blzq + '</p><p>浪高：' + res.data.jpn.data[i].items[0].lg + '</p><p>浪向：' + res.data.jpn.data[i].items[0].lx + '</p><p>时间：' + res.data.jpn.data[i].items[0].tm + '</p><img style="width: 100%;" src="' + head + ans.data.data[0].url + '"></div>', // 设置文本标注内容
+                  //   direction: 'top',
+                  //   zIndex: 500
+                  // })
                 }).catch(e => {
                   console.log('获取失败' + e)
                 })
@@ -791,9 +803,6 @@ export default {
     changetuli (flag) {
       this.istuli = flag
     }
-    // closeMarker () {
-    //   this.myMap.remove(this.telist)
-    // }
   }
 }
 </script>
@@ -856,5 +865,66 @@ export default {
 .chartClass{
   width: 100%;
   height: 100%;
+}
+#volet_clos {
+  position: fixed;
+  top: 80px;
+  right: 0;
+}
+#volet span {
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #000;
+}
+#volet {
+  width: 165px;
+  max-height: 70vh;
+  padding: 10px;
+  background: #fff;
+  color: #fff;
+  /*display: none;*/
+  z-index: 0;
+}
+
+#volet a.ouvrir,
+#volet a.fermer {
+  padding: 10px 25px;
+  background: #555;
+  color: #fff;
+  text-decoration: none;
+}
+
+#volet {
+  position: absolute;
+  border-radius: 8px;
+  border: 1px solid #fff;
+  right: -272px;  /* test fixed + scroll, on retire la position top */
+  -webkit-transition: all .5s ease-in;
+  -moz-transition: all .5s ease-in;
+  transition: all .5s ease-in;
+  min-height: 400px;
+}
+#volet a.ouvrir,
+#volet a.fermer {
+  position: absolute;
+  left: -79px;
+  top: 150px;
+  -webkit-transform: rotate(270deg);
+  -moz-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
+  -ms-transform: rotate(270deg);
+  -moz-radius: 0 0 8px 8px;
+  border-radius: 8px 8px 0 0;
+}
+#volet a.fermer {
+  display: none;
+}
+.activex {
+  right: 10px!important;
+  /*display: block!important;*/
+  z-index: 500;
+  -webkit-transition: all .5s ease-in!important;
+  -moz-transition: all .5s ease-in!important;
+  transition: all .5s ease-in!important;
 }
 </style>
