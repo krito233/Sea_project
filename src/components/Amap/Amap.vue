@@ -1,25 +1,48 @@
 <template>
-<div class="container">
+  <div class="container">
     <div id="allmap"></div>
-  <p v-if="iscloud" class="radartit">{{time}}</p>
-  <p v-if="israder" class="radartit">{{time}}</p>
-  <!--<p v-if="isshowfubiao" class="radartit">{{fubiaoinfo}}</p>-->
-  <div class="zuo">
-    <img v-if="istuli" class="tuli" src="../../assets/tuli.png"/>
-    <p class="copyright">青岛海之声科技有限公司技术服务</p>
-  </div>
-  <div id="volet_clos">
-    <div id="volet" :class="{activex:isshowfubiaowin}" style="text-align: center">
-      <!--<span style="float: left">清除路径</span><span style="margin-left: 4rem;">></span>-->
-      <!--<ul class="tf_list" style="text-align: left">-->
+    <p v-if="iscloud" class="radartit">{{time}}</p>
+    <p v-if="israder" class="radartit">{{time}}</p>
+    <!--<p v-if="isshowfubiao" class="radartit">{{fubiaoinfo}}</p>-->
+    <div class="zuo">
+      <img v-if="istuli" class="tuli" src="../../assets/tuli.png"/>
+      <p class="copyright">青岛海之声科技有限公司技术服务</p>
+    </div>
+    <div id="volet_clos">
+      <div id="volet" :class="{activex:isshowfubiaowin}" style="text-align: center;color: black">
+        <p>{{fbname}}</p>
+        <p v-if="mode===0" style="cursor: pointer;float:right;color:rgb(68,114,196);font-size: 1rem;" @click="changemode(1)">三天内历史数据</p>
+        <p v-if="mode===1" style="cursor: pointer;float:right;color:rgb(68,114,196);font-size: 1rem;" @click="changemode(0)">收起</p>
+        <table class="table_tw">
+          <tr>
+            <th>时间</th>
+            <th v-if="fubiaotype==='wz'">潮位</th>
+            <th v-if="fubiaotype==='wz'">警戒值</th>
+            <th v-if="fubiaotype!=='wz'">波浪周期</th>
+            <th v-if="fubiaotype!=='wz'">浪高</th>
+            <th v-if="fubiaotype!=='wz'">浪向</th>
+          </tr>
+          <tr v-for="(info, index) in fubiaoinfo" v-if="(mode===0&&index<3)||(mode===1&&index<72)">
+            <td>{{info.tm}}</td>
+            <td v-if="fubiaotype==='wz'">{{info.val}}</td>
+            <td v-if="fubiaotype==='wz'">{{info.wrz}}</td>
+            <td v-if="fubiaotype!=='wz'">{{info.blzq}}</td>
+            <td v-if="fubiaotype!=='wz'">{{info.lg}}</td>
+            <td v-if="fubiaotype!=='wz'">{{info.lx}}</td>
+          </tr>
+        </table>
+        <!--<div id="container2" class="chartClass" style="width: 100%; height: 20vh;"></div>-->
+        <!--<span style="float: left">清除路径</span><span style="margin-left: 4rem;">></span>-->
+        <!--<ul class="tf_list" style="text-align: left">-->
         <!--<li v-for="(ty) in tylist" :class="{sel:showlist.includes(ty.tfbh)}" @click="addlist(ty.tfbh)">&nbsp; {{ty.tfbh}} &nbsp;&nbsp;&nbsp; {{ty.name}}</li>-->
-      <!--</ul>-->
-      <!--<button class="sub" @click="typhoonall">完成</button>-->
-      <!--<a href="" class="ouvrir">台风路径</a>-->
-      <!--<a href="#volet_clos" class="fermer" aria-hidden="true">台风路径</a>-->
+        <!--</ul>-->
+        <!--<button class="sub" @click="typhoonall">完成</button>-->
+        <!--<a href="" class="ouvrir">台风路径</a>-->
+        <!--<a href="#volet_clos" class="fermer" aria-hidden="true">台风路径</a>-->
+
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -70,7 +93,10 @@ export default {
       dataTList: [],
       // isshowfubiao: false,
       isshowfubiaowin: false,
-      fubiaoinfo: ''
+      fubiaoinfo: [],
+      fbname: '',
+      jpfbimg: '',
+      mode: 0
     }
   },
   mounted () {
@@ -198,10 +224,6 @@ export default {
       if (this.fubiaoList !== []) {
         this.cleanMarker()
       }
-      // if (this.fubiaotype === 'wz') {
-      //   this.fubiaotype = ''
-      //   return
-      // }
       this.fubiaotype = 'wz'
       let _this = this
       let list = this.wz
@@ -225,9 +247,10 @@ export default {
             })
             marker.on('click', function () {
               let this_ = _this
-              // let f = this.getExtData().index
-              this_.isshowfubiaowin = !this_.isshowfubiaowin
-              console.log(this.getExtData().index)
+              this_.isshowfubiaowin = true
+              _this.mode = 0
+              // console.log(this.getExtData().index)
+              this_.fbname = this.getExtData().job.stnm
               request({
                 url: '/thirdparty/tpdata/wz.do',
                 params: {day: 2}
@@ -235,7 +258,6 @@ export default {
                 this_.dataList = null
                 this_.dataList = []
                 this_.fubiaoinfo = res2.data.data[i].data
-                console.log(res2.data.data[i].data)
                 for (let x = 0; x < res2.data.data[i].data.length; x++) {
                   this_.dataList[x] = []
                   this_.dataList[x][0] = x
@@ -246,24 +268,14 @@ export default {
                   }
                   this_.dataTList[x] = res2.data.data[i].data[x].tm
                 }
-                // console.log(this_.dataList)
+                console.log(this_.dataList)
                 this_.drawHistory(2)
               })
               for (let j = 0; j < _this.fubiaoList.length; j++) {
-                // _this.fubiaoList[j].setLabel(null)
+                _this.fubiaoList[j].setLabel(null)
                 _this.fubiaoList[j].setzIndex(1)
               }
               this.setzIndex(500)
-              // let index = this.getExtData().index
-              // marker.setLabel({
-              //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
-              //   content: '<div class="fubiao_info">' +
-              //     // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-              //     '<p>当前潮位值：' + res.data.data[i].data[0].val + '</p>' +
-              //     '<p>该点警戒值：' + res.data.data[i].data[0].wrz + '</p><p>时间：' + res.data.data[i].data[0].tm + '</p></div><div id="container2" class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
-              //   direction: 'top',
-              //   zIndex: 500
-              // })
             })
             let text = new AMap.Text({
               text: job.stnm,
@@ -294,14 +306,6 @@ export default {
     },
     showjpfubiao (flag) {
       this.cleanMarker()
-      // if (flag === 0 && this.fubiaotype === 'tw') {
-      //   this.fubiaotype = ''
-      //   return
-      // }
-      // if (flag === 1 && this.fubiaotype === 'jp') {
-      //   this.fubiaotype = ''
-      //   return
-      // }
       let _this = this
       let list = ''
       let url = '/thirdparty/tpdata/fb.do'
@@ -316,8 +320,8 @@ export default {
         url: url
       }).then(res => {
         console.log('获取成功')
-        console.log(res.data.jpn.data[0].items[0].lx.length)
-        console.log(res.data.jpn.data[0].items[0].lx[0])
+        // console.log(res.data.jpn.data[0].items[0].lx.length)
+        // console.log(res.data.jpn.data[0].items[0].lx[0])
         loadAmap().then(AMap => {
           for (let i = 0; i < list.length; i++) {
             let job = list[i]
@@ -333,7 +337,9 @@ export default {
               extData: data
             })
             marker.on('click', function () {
-              _this.isshowfubiaowin = !_this.isshowfubiaowin
+              _this.mode = 0
+              _this.isshowfubiaowin = true
+              _this.fbname = this.getExtData().job.stnm
               for (let j = 0; j < _this.fubiaoList.length; j++) {
                 _this.fubiaoList[j].setLabel(null)
                 _this.fubiaoList[j].setzIndex(1)
@@ -350,7 +356,6 @@ export default {
                   this_.dataList = null
                   this_.dataList = []
                   this_.fubiaoinfo = res2.data.tw.data[i].items
-                  console.log(res2.data.tw.data[i].items)
                   for (let x = 0; x < res2.data.tw.data[i].items.length; x++) {
                     this_.dataList[x] = []
                     this_.dataList[x][0] = x
@@ -364,16 +369,17 @@ export default {
                   console.log(this_.dataList)
                   this_.drawHistory(3)
                 })
-                marker.setLabel({
-                  offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
-                  content: '<div class="fubiao_info2" style="padding: 5px 5px;">' +
-                    // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
-                    '<p>波浪周期：' + res.data.tw.data[i].items[0].blzq + '</p><p>浪高：' + res.data.tw.data[i].items[0].lg + '</p><p>浪向：' + res.data.tw.data[i].items[0].lx + '</p><p>时间：' + res.data.tw.data[i].items[0].tm + '</p></div><div id="container3"  class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
-                  direction: 'top',
-                  zIndex: 500
-                })
+                // marker.setLabel({
+                //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
+                //   content: '<div class="fubiao_info2" style="padding: 5px 5px;">' +
+                //       // '<button class="aui_close2" @click="{this.$refs["amap"].closeMarker(' + index + ')}">×</button>' +
+                //       '<p>波浪周期：' + res.data.tw.data[i].items[0].blzq + '</p><p>浪高：' + res.data.tw.data[i].items[0].lg + '</p><p>浪向：' + res.data.tw.data[i].items[0].lx + '</p><p>时间：' + res.data.tw.data[i].items[0].tm + '</p></div><div id="container3"  class="chartClass" style="width: 100%; height: 20vh;"></div>', // 设置文本标注内容
+                //   direction: 'top',
+                //   zIndex: 500
+                // })
               } else {
-                let this_ = this
+                _this.fubiaoinfo = res.data.jpn.data[i].items
+                // _this.fbname = this.getExtData().job.stnm
                 request({
                   url: '/thirdparty/tpdata/getPic.do',
                   params: {
@@ -382,9 +388,8 @@ export default {
                     stcd: res.data.jpn.data[i].stcd
                   }
                 }).then(ans => {
-                  // console.log(ans)
-                  this_.fubiaoinfo = res.data.jpn.data[i].items
-                  console.log(res.data.jpn.data[i].items)
+                  console.log(ans)
+                  _this.jpfbimg = _this.head + ans.data.data[0].url
                   // marker.setLabel({
                   //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
                   //   content: '<div class="fubiao_info2">' +
@@ -791,129 +796,191 @@ export default {
     },
     changetuli (flag) {
       this.istuli = flag
+    },
+    changemode (flag) {
+      this.mode = flag
     }
   }
 }
 </script>
 
 <style scoped>
-.container {
+  .container {
     width: 85%;
     height: 88vh;
     top: 10vh;
     left: 14%;
     position: relative;
-  background: linear-gradient(135deg, transparent $tl, $bg 0) top left;
-  /*text-align: center;*/
-}
-#allmap {
+    background: linear-gradient(135deg, transparent $tl, $bg 0) top left;
+    /*text-align: center;*/
+  }
+  #allmap {
     width: 100%;
     height: 100%;
-}
-.radartit {
-  position: absolute;
-  font-size: 1.2rem;
-  top: 10px;
-  right: 20px;
-  z-index: 0;
-}
-.btn {
-  position: absolute;
-  left: 200px;
-  bottom: 20px;
-  text-align: center
-}
-.typhoon_info{
-  box-shadow:3px 3px 2px #888888;
-  width:230px;
-  height:auto;
-  border-radius:10px;
-  background-color:#ffffff;
-}
-.typhoon_info>.head{
-  padding:8px 0px 8px 0px;border-top-right-radius:10px;border-top-left-radius:10px;background-color:#AADAFF;color:#333333;width:100%;font-size:15px;text-align:center;
-}
-.typhoon_info>div{
-  padding:5px 0px 5px 0px;width:100%;
-}
-.typhoon_info>div>p{
-  margin:0;
-  font-size:13px;
-}
-.copyright {
-  background-color: #fff;
-}
-.tuli {
-  width: 14rem;
-}
-.zuo {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-.chartClass{
-  width: 100%;
-  height: 100%;
-}
-#volet_clos {
-  position: fixed;
-  top: 80px;
-  right: 0;
-}
-#volet span {
-  cursor: pointer;
-  font-size: 1.1rem;
-  color: #000;
-}
-#volet {
-  width: 165px;
-  max-height: 70vh;
-  padding: 10px;
-  background: #fff;
-  color: #fff;
-  /*display: none;*/
-  z-index: 0;
-}
+  }
+  .radartit {
+    position: absolute;
+    font-size: 1.2rem;
+    top: 10px;
+    right: 20px;
+    z-index: 0;
+  }
+  .btn {
+    position: absolute;
+    left: 200px;
+    bottom: 20px;
+    text-align: center
+  }
+  .typhoon_info{
+    box-shadow:3px 3px 2px #888888;
+    width:230px;
+    height:auto;
+    border-radius:10px;
+    background-color:#ffffff;
+  }
+  .typhoon_info>.head{
+    padding:8px 0px 8px 0px;border-top-right-radius:10px;border-top-left-radius:10px;background-color:#AADAFF;color:#333333;width:100%;font-size:15px;text-align:center;
+  }
+  .typhoon_info>div{
+    padding:5px 0px 5px 0px;width:100%;
+  }
+  .typhoon_info>div>p{
+    margin:0;
+    font-size:13px;
+  }
+  .copyright {
+    background-color: #fff;
+  }
+  .tuli {
+    width: 14rem;
+  }
+  .zuo {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  .chartClass{
+    width: 100%;
+    height: 100%;
+  }
+  #volet_clos {
+    position: fixed;
+    top: 160px;
+    right: 0;
+  }
+  #volet span {
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #000;
+  }
+  #volet {
+    width: 25vw;
+    max-height: 45vh;
+    padding: 10px;
+    background: #fff;
+    color: #fff;
+    /*display: none;*/
+    z-index: 0;
+    overflow: auto;
+  }
+  #container2{
+    margin-top: 5vh;
+  }
+  table{
+    border-spacing: 0px!important;
+    width: 100%;
+    margin-top: 3rem;
+  }
+  #volet p{
+    float: left;
+    font-size: 1.2rem;
+    color: #000;
+    cursor: pointer;
+  }
+  tr{
+    display: table-row;
+    border: 1px solid #555;
+    font-size: 12px;
+    padding: 3px;
+    vertical-align: top;
+    text-align: center;
+  }
+  th{
+    font-size: 1em;
+    padding: 5px;
+  }
+  tr:nth-child(odd) {
+    background-color: #f6f4f0;
+  }
+  tr:first-child {
+    color: #fff;
+    background-color: #555;
+  }
+  td{
+    display: table-cell;
+    line-height: 2em;
+    min-width: 2vw;
+    border: 1px solid #d4d4d4;
+    padding: 5px;
+    vertical-align: top;
+    font-size: 1em;
+  }
+  #volet a.ouvrir,
+  #volet a.fermer {
+    padding: 10px 25px;
+    background: #555;
+    color: #fff;
+    text-decoration: none;
+  }
 
-#volet a.ouvrir,
-#volet a.fermer {
-  padding: 10px 25px;
-  background: #555;
-  color: #fff;
-  text-decoration: none;
-}
-
-#volet {
-  position: absolute;
-  border-radius: 8px;
-  border: 1px solid #fff;
-  right: -272px;  /* test fixed + scroll, on retire la position top */
-  -webkit-transition: all .5s ease-in;
-  -moz-transition: all .5s ease-in;
-  transition: all .5s ease-in;
-  min-height: 400px;
-}
-#volet a.ouvrir,
-#volet a.fermer {
-  position: absolute;
-  left: -79px;
-  top: 150px;
-  -webkit-transform: rotate(270deg);
-  -moz-transform: rotate(270deg);
-  -o-transform: rotate(270deg);
-  -ms-transform: rotate(270deg);
-  -moz-radius: 0 0 8px 8px;
-  border-radius: 8px 8px 0 0;
-}
-#volet a.fermer {
-  display: none;
-}
-.activex {
-  right: 10px!important;
-  /*display: block!important;*/
-  z-index: 500;
-  -webkit-transition: all .5s ease-in!important;
-  -moz-transition: all .5s ease-in!important;
-  transition: all .5s ease-in!important;
-}
+  #volet {
+    position: absolute;
+    border-radius: 8px;
+    border: 1px solid #fff;
+    right: -27vw;  /* test fixed + scroll, on retire la position top */
+    -webkit-transition: all .5s ease-in;
+    -moz-transition: all .5s ease-in;
+    transition: all .5s ease-in;
+    min-height: 400px;
+  }
+  #volet a.ouvrir,
+  #volet a.fermer {
+    position: absolute;
+    left: -79px;
+    top: 150px;
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    -moz-radius: 0 0 8px 8px;
+    border-radius: 8px 8px 0 0;
+  }
+  #volet a.fermer {
+    display: none;
+  }
+  .activex {
+    right: 10px!important;
+    /*display: block!important;*/
+    z-index: 500;
+    -webkit-transition: all .5s ease-in!important;
+    -moz-transition: all .5s ease-in!important;
+    transition: all .5s ease-in!important;
+  }
+  #volet::-webkit-scrollbar {/*滚动条整体样式*/
+    margin-right: 3px;
+    width: 10px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
+    /*scrollbar-arrow-color:red;*/
+  }
+  #volet::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.2);
+    scrollbar-arrow-color:red;
+  }
+  #volet::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0;
+    background: rgba(0,0,0,0.1);
+  }
 </style>

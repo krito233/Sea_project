@@ -809,6 +809,8 @@ export default {
       if (this.winopen) {
         this.imgclose()
       }
+      this.$refs['amap'].isshowfubiaowin = false
+      this.$refs['amap'].mode = 0
     },
     allclearx () {
       this.$refs['amap'].cleanMarker()
@@ -825,6 +827,8 @@ export default {
       if (this.winopen) {
         this.imgclose()
       }
+      this.$refs['amap'].isshowfubiaowin = false
+      this.$refs['amap'].mode = 0
     },
     clickimg (pic, index) {
       this.imgurl = head + pic.url
@@ -1246,29 +1250,6 @@ export default {
   width: 100%;
   max-height: 25vh;
 }
-/*.tf a {*/
-  /*color: #fff;*/
-  /*background-color: #6cafe8;*/
-  /*border-radius: 4px;*/
-  /*border: 1px solid #000;*/
-  /*padding: 0.6rem;*/
-/*}*/
-/*.tf:hover .tf_list{*/
-  /*display: block!important;*/
-/*}*/
-/*.tf_list {*/
-  /*display: none;*/
-  /*color: #fff;*/
-  /*background-color: #6cafe8;*/
-  /*padding-top: 10px;*/
-/*}*/
-/*.tf_list li {*/
-  /*font-size: 1rem;*/
-  /*padding: 0.2rem 0.6rem;*/
-/*}*/
-/*.tf_list li:hover {*/
-  /*background-color: rgba(0,0,0,0.2);*/
-/*}*/
 .footer {
   display: flex;
 }
