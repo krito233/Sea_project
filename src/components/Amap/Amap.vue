@@ -31,14 +31,8 @@
             <td v-if="fubiaotype!=='wz'">{{info.lx}}</td>
           </tr>
         </table>
-        <!--<div id="container2" class="chartClass" style="width: 100%; height: 20vh;"></div>-->
-        <!--<span style="float: left">清除路径</span><span style="margin-left: 4rem;">></span>-->
-        <!--<ul class="tf_list" style="text-align: left">-->
-        <!--<li v-for="(ty) in tylist" :class="{sel:showlist.includes(ty.tfbh)}" @click="addlist(ty.tfbh)">&nbsp; {{ty.tfbh}} &nbsp;&nbsp;&nbsp; {{ty.name}}</li>-->
-        <!--</ul>-->
-        <!--<button class="sub" @click="typhoonall">完成</button>-->
-        <!--<a href="" class="ouvrir">台风路径</a>-->
-        <!--<a href="#volet_clos" class="fermer" aria-hidden="true">台风路径</a>-->
+        <p style="margin-top: 10px;">历史浪高图</p>
+        <div id="container2" class="chartClass" style="width: 25vw; height: 20vh;"></div>
 
       </div>
     </div>
@@ -147,11 +141,11 @@ export default {
           }
         }).then(res => {
           _this.cloudurl = res.data
-          _this.time = res.data.data[0].tm.substring(0, 4) + '年' + res.data.data[0].tm.substring(5, 7) + '月' + res.data.data[0].tm.substring(8, 10) + '日' + res.data.data[0].tm.substring(11, 17) + '云图'
+          _this.time = res.data.data[res.data.data.length-1].tm.substring(0, 4) + '年' + res.data.data[res.data.data.length-1].tm.substring(5, 7) + '月' + res.data.data[res.data.data.length-1].tm.substring(8, 10) + '日' + res.data.data[res.data.data.length-1].tm.substring(11, 17) + '云图'
           loadAmap().then(AMap => {
             _this.cloud = new AMap.ImageLayer({
               bounds: new AMap.Bounds([95, -2], [160, 43]),
-              url: head + res.data.data[0].url, // 图片 Url
+              url: head + res.data.data[res.data.data.length-1].url, // 图片 Url
               zIndex: 2,
               opacity: 0.7,
               zooms: [3, 18] // 设置可见级别，[最小级别，最大级别]
@@ -183,12 +177,12 @@ export default {
           }
         }).then(res => {
           _this.cloudurl = res.data
-          _this.time = res.data.data[0].tm.substring(0, 4) + '年' + res.data.data[0].tm.substring(5, 7) + '月' + res.data.data[0].tm.substring(8, 10) + '日' + res.data.data[0].tm.substring(11, 17) + '雷达图'
+          _this.time = res.data.data[res.data.data.length-1].tm.substring(0, 4) + '年' + res.data.data[res.data.data.length-1].tm.substring(5, 7) + '月' + res.data.data[res.data.data.length-1].tm.substring(8, 10) + '日' + res.data.data[res.data.data.length-1].tm.substring(11, 17) + '雷达图'
           // console.log(res.data.data[0].url)
           loadAmap().then(AMap => {
             _this.cloud = new AMap.ImageLayer({
               bounds: new AMap.Bounds([71.9282, 3.9079], [150.6026, 57.9079]),
-              url: head + res.data.data[0].url, // 图片 Url
+              url: head + res.data.data[res.data.data.length-1].url, // 图片 Url
               zIndex: 2,
               opacity: 0.7,
               zooms: [3, 18] // 设置可见级别，[最小级别，最大级别]
@@ -367,7 +361,7 @@ export default {
                     this_.dataTList[x] = res2.data.tw.data[i].items[x].tm
                   }
                   console.log(this_.dataList)
-                  this_.drawHistory(3)
+                  this_.drawHistory(2)
                 })
                 // marker.setLabel({
                 //   offset: new AMap.Pixel(125, 345), // 设置文本标注偏移量
@@ -379,6 +373,18 @@ export default {
                 // })
               } else {
                 _this.fubiaoinfo = res.data.jpn.data[i].items
+                for (let x = 0; x < _this.fubiaoinfo.length; x++) {
+                  _this.dataList[x] = []
+                  _this.dataList[x][0] = x
+                  if (_this.fubiaoinfo[x].lg === '-') {
+                    _this.dataList[x][1] = ''
+                  } else {
+                    _this.dataList[x][1] = eval(_this.fubiaoinfo[x].lg)
+                  }
+                  _this.dataTList[x] = _this.fubiaoinfo[x].tm
+                }
+                // console.log(_this.fubiaoinfo)
+                _this.drawHistory(3)
                 // _this.fbname = this.getExtData().job.stnm
                 request({
                   url: '/thirdparty/tpdata/getPic.do',
@@ -445,19 +451,29 @@ export default {
     },
     drawHistory (k) {
       let this_ = this
-      console.log('233')
-      if (k === 2) {
-        this.myChart2 = echarts.init(document.getElementById('container2'))
-      } else {
-        this.myChart2 = echarts.init(document.getElementById('container3'))
-      }
+      // console.log('233')
+      this.myChart2 = echarts.init(document.getElementById('container2'))
+      // if (k === 2) {
+      //   this.myChart2 = echarts.init(document.getElementById('container2'))
+      // } else {
+      //   this.myChart2 = echarts.init(document.getElementById('container3'))
+      // }
       this.myChart2.setOption({
         xAxis: {
           type: 'category',
-          data: this_.dataTList
+          data: this_.dataTList.reverse(),
+          name: ''
+          //   (function () {
+          //  if(k === 2){
+          //    return this_.dataTList.reverse()
+          //  }else if(k === 3){
+          //    return this_.dataTList
+          //  }
+          // })()
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          name: ''
         },
         grid: {
           left: '10%',
@@ -473,7 +489,14 @@ export default {
           }
         },
         series: [{
-          data: this_.dataList,
+          data: this_.dataList.reverse(),
+          //   (function () {
+          //   if(k === 2){
+          //     return this_.dataList.reverse()
+          //   }else if(k === 3){
+          //     return this_.dataList
+          //   }
+          // })(),
           type: 'line'
         }]
       })

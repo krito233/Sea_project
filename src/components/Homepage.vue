@@ -1369,7 +1369,7 @@ export default {
   .img_container img{
     /*text-align: left!important;*/
     width: 60%;
-    max-height: 70vh;
+    max-height: 55vh;
     /*margin: 0 auto;*/
     margin-top: 5vh;
     margin-left: 15%;
@@ -1604,7 +1604,7 @@ export default {
     margin: 0 auto!important;
   }
   .tup {
-    max-height: 75vh;
+    max-height: 60vh;
     text-align: left;
     position: relative;
   }
