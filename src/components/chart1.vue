@@ -31,13 +31,13 @@
     list-style-type: none;
   }
   .bn_menu1{
-    top: 70vh;
+    top: 76vh;
     width: 100%;
     position: absolute;
     text-align: center;
   }
   .bn_menu2{
-    top: 75vh;
+    top: 80vh;
     width: 100%;
     position: absolute;
     text-align: center;
@@ -53,7 +53,7 @@
     margin-top: 2vh;
   }
   .menu {
-    width: 20%;
+    width: 10%;
     position: absolute;
     top: 10vh;
     left: 10px;
@@ -89,8 +89,8 @@ import echarts from 'echarts'
 import axios from 'axios'
 import index from '../router'
 // var tiptip = 1
-// var moren = 'http://test.qdwanzhong.top'
-var moren = '..'
+var moren = 'http://test.qdwanzhong.top'
+//var moren = '..'
 export default {
   name: 'chart1',
   data () {
@@ -209,15 +209,15 @@ export default {
                 } else if (this_.yuanShi.length === 72) {
                   sjgs = 72
                 }
-                for (var i = 0; i <= sjgs; i++) {
+                for (var i = 0; i < this_.yuanShi.length; i++) {
                   var s
                   if (i % 24 < 10) {
                     s = '0' + i % 24
                   } else {
                     s = i % 24
                   }
-                  if (i < 23) {
-                    if (sjgs === 23) {
+                  if (i <= 23) {
+                    if (this_.yuanShi.length <= 24) {
                       tim[i] = this_.todayE + '\n' + s + ':00'
                     } else {
                       tim[i] = this_.todayE[0] + '\n' + s + ':00'
@@ -231,7 +231,13 @@ export default {
                 console.log(this_.todayE)
                 return tim
               })(),
-          name: '时间'
+          name: '时间',
+          nameTextStyle:{fontSize: 14},
+          axisLabel: {
+            textStyle: {
+              fontSize : 14     //更改坐标轴文字大小
+            }
+          }
         },
         yAxis: {
           type: 'value',
@@ -245,7 +251,13 @@ export default {
             } else if (this_.szyb === 'cx') {
               return '潮位/米'
             }
-          })()
+          })(),
+          nameTextStyle:{fontSize: 14},
+          axisLabel: {
+            textStyle: {
+              fontSize : 14     //更改坐标轴文字大小
+            }
+          },
         },
         // dataZoom: [
         //   // {
@@ -433,11 +445,11 @@ export default {
     dataChange (k) {
       this.choosedata = k
       var date = new Date()
-      var date2 = new Date(date.getTime() + k * 24 * 60 * 60 * 1000)
-      var date3 = new Date(date.getTime() + (k + 2) * 24 * 60 * 60 * 1000)
-      this.today0 = new Date(date.getTime() + 1 * 24 * 60 * 60 * 1000)
-      this.today1 = new Date(date.getTime() + 2 * 24 * 60 * 60 * 1000)
-      this.today2 = new Date(date.getTime() + 3 * 24 * 60 * 60 * 1000)
+      var date2 = new Date(date.getTime() + (k - 1) * 24 * 60 * 60 * 1000)
+      var date3 = new Date(date.getTime() + (k + 1) * 24 * 60 * 60 * 1000)
+      this.today0 = new Date(date.getTime() + 0 * 24 * 60 * 60 * 1000)
+      this.today1 = new Date(date.getTime() + 1 * 24 * 60 * 60 * 1000)
+      this.today2 = new Date(date.getTime() + 2 * 24 * 60 * 60 * 1000)
       this.today0 = this.format(this.today0, 2)
       this.today1 = this.format(this.today1, 2)
       this.today2 = this.format(this.today2, 2)
@@ -449,8 +461,8 @@ export default {
       } else if (k === 2) {
         this.todayE = this.today2
       } else if (k === 3) {
-        date2 = new Date(date.getTime() + 0 * 24 * 60 * 60 * 1000)
-        date3 = new Date(date.getTime() + 4 * 24 * 60 * 60 * 1000)
+        date2 = new Date(date.getTime() - 24 * 60 * 60 * 1000)
+        date3 = new Date(date.getTime() + 3 * 24 * 60 * 60 * 1000)
         this.todayE = []
         this.todayE[0] = this.today0
         this.todayE[1] = this.today1

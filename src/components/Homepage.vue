@@ -126,77 +126,82 @@
           </div>
       </div>
     </div>
-    <div class="mapCorner"></div>
+<!--    <div class="mapCorner"></div>-->
     <AMap class="map" ref="amap"/>
     <div class="l_part">
       <ul class="fri">
-        <li><div class="frili" @click="changemenu(1)">实况数据</div>
-          <div class="sec cebian" :class="{down:ismenu1}">
-            <ul class="">
-              <li :class="{checked:checked === '韩国天气图'}" @click="allclear(),checked='韩国天气图',getimgurl('kr', 0)">韩国天气图</li>
-              <li :class="{checked:checked === '日本天气图1'}" @click="allclear(),checked='日本天气图1',getimgurl('jpnqy', 0)">日本天气图</li>
-              <li :class="{checked:checked === '日本云图'}" @click="allclear(),checked='日本云图',getimgurl('jpncloud', 0)">日本云图</li>
-              <li :class="{checked:checked === '日本波浪传真图1'}" @click="allclear(),checked='日本波浪传真图1',getimgurl('jpnblcz', 0)">日本波浪传真图</li>
-              <li :class="{checked:checked === '云图'}" @click="yuntu">云图</li>
-              <li :class="{checked:checked === '雷达图'}" @click="radar">雷达图</li>
-              <li :class="{checked:checked === 'jp'}" @click="jpfubiao">日本浮标</li>
-              <li :class="{checked:checked === 'wz'}" @click="wzfubiao">温州实测</li>
-              <li :class="{checked:checked === 'tw'}" @click="twfubiao">台湾浮标</li>
-            </ul>
-          </div>
+        <li><div class="frili" @mouseover="changemenu(1)" :class="{friliActive:ismenu1}">实况数据</div>
+
         </li>
-        <li><div class="frili" @click="changemenu(2)">预报数据</div>
-          <div class="sec cebian" :class="{down:ismenu2}">
-            <ul class="">
-              <li :class="{checked:checked === '韩国天气图2'}" @click="allclear(),checked='韩国天气图2',getimgurl('kr', 1)">韩国天气图</li>
-              <li :class="{checked:checked === '日本天气图2'}" @click="allclear(),checked='日本天气图2',getimgurl('jpnqy', 1)">日本天气图</li>
-              <li :class="{checked:checked === '日本波浪图'}" @click="allclear(),checked='日本波浪图',getimgurl('jpnbl', 1)">日本波浪图</li>
-              <li :class="{checked:checked === '国家波浪图'}" @click="allclear(),checked='国家波浪图',getimgurl('cnhailang', 1)">国家波浪图</li>
-              <li :class="{checked:checked === '日本波浪传真图'}" @click="allclear(),checked='日本波浪传真图',getimgurl('jpnblcz', 1)">日本波浪传真图</li>
-            </ul>
-          </div>
+        <li><div class="frili" @mouseover="changemenu(2)" :class="{friliActive:ismenu2}">预报数据</div>
         </li>
-        <li><div class="frili" @click="changemenu(3)">周会商</div>
-          <div class="sec cebian" :class="{down:ismenu3}">
-            <ul class="">
-              <li :class="{checked:checked === '台湾天气图'}" @click="allclear(),checked='台湾天气图',getimgurl('twyb', 0)">台湾一周预报</li>
-              <li :class="{checked:checked === '日本天气图'}" @click="allclear(),checked='日本天气图',getimgurl('jpn', 1)">日本一周预报</li>
-              <li :class="{checked:checked === '欧洲中心'}" @click="allclear(),checked = '欧洲中心',getimgurl('euro', 0)">欧洲中心</li>
-            </ul>
-          </div>
+        <li><div class="frili" @mouseover="changemenu(3)"  :class="{friliActive:ismenu3}">周会商</div>
         </li>
-        <li><div class="frili" @click="changemenu(4)">灾害警报</div>
-          <div class="sec cebian" :class="{down:ismenu4}">
-            <ul class="">
-              <li :class="{checked:checked === '国家波浪遥感图'}" @click="allclear(),checked='国家波浪遥感图',getimgurl('cnwave', 0)">国家波浪遥感图</li>
-              <li :class="{checked:checked === '国家海浪图'}" @click="allclear(),checked='国家海浪图',getimgurl('cnhailang', 0)">国家海浪图</li>
-              <li :class="{checked:checked === '国家水温图'}" @click="allclear(),checked='国家水温图',getimgurl('cnsw', 0)">国家水温图</li>
-              <!--<li :class="{checked:checked === '日本天气图3'}" @click="allclear(),checked='日本天气图3',getimgurl('jpnqy', 0)">日本天气图</li>-->
-              <li :class="{checked:checked === '台风路径'}" @click="givelist">台风路径</li>
-            </ul>
-          </div>
+        <li><div class="frili" @mouseover="changemenu(4)" :class="{friliActive:ismenu4}">灾害警报</div>
         </li>
         <!--<li @click="typhoon(201918)">台风路径</li>-->
-        <li><div class="frili"  @click="changemenu(5)">近岸单元格数值预报</div>
-          <div class="sec cebian" :class="{down:ismenu5}">
-            <ul class="">
-              <li :class="{checked:checked === '海浪预报'}" @click="ybWatch(0)">海浪预报</li>
-              <li :class="{checked:checked === '海温预报'}" @click="ybWatch(1)">海温预报</li>
-              <li :class="{checked:checked === '潮汐预报'}" @click="ybWatch(2)">潮汐预报</li>
-              <!--<li :class="{checked:checked === '海浪预报'}" @click="">海浪预报</li>-->
-              <!--<li :class="{checked:checked === '海温预报'}" @click="allclear(),checked='海温预报',showchart(1)">海温预报</li>-->
-              <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
-            </ul>
-          </div>
+        <li><div class="frili"  @mouseover="changemenu(5)" :class="{friliActive:ismenu5}">近岸单元格数值预报</div>
         </li>
-        <li><div class="frili" @click="changemenu(6)">其他</div>
-          <div class="sec cebian" :class="{down:ismenu6}">
-            <ul>
-              <li :class="{checked:checked === '手动获取图片'}" @click="allclear(),checked='手动获取图片',winopen = true,isshow = !isshow,imgtype='sd'">手动获取图片</li>
-            </ul>
-          </div>
+        <li><div class="frili" @mouseover="changemenu(6)" :class="{friliActive:ismenu6}">其他</div>
+
         </li>
+        <div class="copyright">青岛海之声科技有限公司技术服务</div>
       </ul>
+    </div>
+    <div class="child_menu" :class="{showm:showMenu}" @mouseleave="mouseLeave">
+    <div class="sec" :class="{down:ismenu1}">
+      <ul class="">
+        <li :class="{checked:checked === '韩国天气图'}" @click="allclear(),checked='韩国天气图',getimgurl('kr', 0)">韩国天气图</li>
+        <li :class="{checked:checked === '日本天气图1'}" @click="allclear(),checked='日本天气图1',getimgurl('jpnqy', 0)">日本天气图</li>
+        <li :class="{checked:checked === '日本云图'}" @click="allclear(),checked='日本云图',getimgurl('jpncloud', 0)">日本云图</li>
+        <li :class="{checked:checked === '日本波浪传真图1'}" @click="allclear(),checked='日本波浪传真图1',getimgurl('jpnblcz', 0)">日本波浪传真图</li>
+        <li :class="{checked:checked === '云图'}" @click="yuntu">云图</li>
+        <li :class="{checked:checked === '雷达图'}" @click="radar">雷达图</li>
+        <li :class="{checked:checked === 'jp'}" @click="jpfubiao">日本浮标</li>
+        <li :class="{checked:checked === 'wz'}" @click="wzfubiao">温州实测</li>
+        <li :class="{checked:checked === 'tw'}" @click="twfubiao">台湾浮标</li>
+      </ul>
+    </div>
+    <div class="sec" :class="{down:ismenu2}">
+      <ul class="">
+        <li :class="{checked:checked === '韩国天气图2'}" @click="allclear(),checked='韩国天气图2',getimgurl('kr', 1)">韩国天气图</li>
+        <li :class="{checked:checked === '日本天气图2'}" @click="allclear(),checked='日本天气图2',getimgurl('jpnqy', 1)">日本天气图</li>
+        <li :class="{checked:checked === '日本波浪图'}" @click="allclear(),checked='日本波浪图',getimgurl('jpnbl', 1)">日本波浪图</li>
+        <li :class="{checked:checked === '国家波浪图'}" @click="allclear(),checked='国家波浪图',getimgurl('cnhailang', 1)">国家波浪图</li>
+        <li :class="{checked:checked === '日本波浪传真图'}" @click="allclear(),checked='日本波浪传真图',getimgurl('jpnblcz', 1)">日本波浪传真图</li>
+      </ul>
+    </div>
+    <div class="sec" :class="{down:ismenu3}">
+      <ul class="">
+        <li :class="{checked:checked === '台湾天气图'}" @click="allclear(),checked='台湾天气图',getimgurl('twyb', 0)">台湾一周预报</li>
+        <li :class="{checked:checked === '日本天气图'}" @click="allclear(),checked='日本天气图',getimgurl('jpn', 1)">日本一周预报</li>
+        <li :class="{checked:checked === '欧洲中心'}" @click="allclear(),checked = '欧洲中心',getimgurl('euro', 0)">欧洲中心</li>
+      </ul>
+    </div>
+    <div class="sec" :class="{down:ismenu4}">
+      <ul class="">
+        <li :class="{checked:checked === '国家波浪遥感图'}" @click="allclear(),checked='国家波浪遥感图',getimgurl('cnwave', 0)">国家波浪遥感图</li>
+        <li :class="{checked:checked === '国家海浪图'}" @click="allclear(),checked='国家海浪图',getimgurl('cnhailang', 0)">国家海浪图</li>
+        <li :class="{checked:checked === '国家水温图'}" @click="allclear(),checked='国家水温图',getimgurl('cnsw', 0)">国家水温图</li>
+        <!--<li :class="{checked:checked === '日本天气图3'}" @click="allclear(),checked='日本天气图3',getimgurl('jpnqy', 0)">日本天气图</li>-->
+        <li :class="{checked:checked === '台风路径'}" @click="givelist">台风路径</li>
+      </ul>
+    </div>
+    <div class="sec" :class="{down:ismenu5}">
+      <ul class="">
+        <li :class="{checked:checked === '海浪预报'}" @click="ybWatch(0)">海浪预报</li>
+        <li :class="{checked:checked === '海温预报'}" @click="ybWatch(1)">海温预报</li>
+        <li :class="{checked:checked === '潮汐预报'}" @click="ybWatch(2)">潮汐预报</li>
+        <!--<li :class="{checked:checked === '海浪预报'}" @click="">海浪预报</li>-->
+        <!--<li :class="{checked:checked === '海温预报'}" @click="allclear(),checked='海温预报',showchart(1)">海温预报</li>-->
+        <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
+      </ul>
+    </div>
+    <div class="sec" :class="{down:ismenu6}">
+      <ul>
+        <li :class="{checked:checked === '手动获取图片'}" @click="allclear(),checked='手动获取图片',winopen = true,isshow = !isshow,imgtype='sd'">手动获取图片</li>
+      </ul>
+    </div>
     </div>
     <!--<div class="r_part">-->
       <!--<ul>-->
@@ -307,7 +312,8 @@ export default {
       edate: null,
       Ascatlist: [],
       jason2list: [],
-      gjkind: 0
+      gjkind: 0,
+      showMenu:false,
     }
   },
   created () {
@@ -847,6 +853,7 @@ export default {
     },
     changemenu (i) {
       // console.log('2333')
+      this.showMenu = true
       if (i === 1) {
         this.ismenu1 = true
         this.ismenu2 = false
@@ -898,6 +905,9 @@ export default {
       //     this.ismenu[a] = false
       //   }
       // }
+    },
+    mouseLeave(){
+      this.showMenu = false
     },
     ybWatch (k) {
       // this.allclear()
@@ -1115,35 +1125,27 @@ export default {
   height: 100vh;
   overflow: hidden;
   position: relative;
-  background: url('../assets/background.png') no-repeat;
-  /*height:100vh;*/
+  /*background: url('../assets/background.png') no-repeat;*/
   width:100%;
-  /*overflow:hidden;*/
-  /*position:relative;*/
   /*background:url(../../static/img/background.6d133b5.png) ;*/
   background-size:cover;
 }
 .logo{
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 4vw;
+  height: 4vw;
   display: inline-block;
   vertical-align:middle;
-  padding: 0 1rem;
+  padding: 0.8rem 1rem 0.2rem;
 }
 .header {
-  width: 50%;
-  font-size: 1rem;
+  width: 13.5%;
+  height: 16vh;
   text-align: center;
   position: absolute;
-  top: 2vh;
-  right: 25%;
   z-index: 99;
-  padding: 0.8rem 1.3rem;
+  /*padding: 0.8rem 1.3rem;*/
   color: #fff;
-  background: #273547;
-  -webkit-border-radius: 2rem;
-  -moz-border-radius: 2rem;
-  border-radius: 2rem;
+  background-color: #183a64;
 }
 .header:before{
   vetical-align:middle;
@@ -1153,21 +1155,21 @@ export default {
 .header p{
   display: inline-block;
   vertical-align:middle;
-  font-size: 20px;
+  font-size: 1vw;
   font-weight: bold;
 }
 .l_part {
-  width: 12%;
+  width: 13.5%;
+  height: 78vh;
   /*height: 100%;*/
   /*padding-top: 230px;*/
-  margin-left: 2%;
   /*line-height: 100px;*/
-  padding-top: 3vh;
+  background-color: #214e86;
+  padding-top: 17vh;
   padding-bottom: 5vh;
   position: absolute;
   z-index: 9;
   top: 0;
-  border-radius: 8px;
   overflow: auto;
 }
   .l_part::-webkit-scrollbar {/*滚动条整体样式*/
@@ -1204,24 +1206,36 @@ export default {
 }
 .img_header{
   width: 100%;
-  height: 5vh;
+  height: 6vh;
   z-index: -10;
   top: 0px;
   left: 0px;
   position: absolute;
   background: #344e76;
-  border-radius: 10px;
 }
 .frili {
   padding: 5px 8px;
   color: #fff;
-  background: rgba(0,0,0,.5);
-  font-size: 1rem;
+  font-size: 0.8vw;
   position: relative;
-  border-radius: 2rem;
   margin-top: 10px;
+  margin-left: 18%;
   cursor: pointer;
 }
+.copyright{
+  position: absolute;
+  color: #7e91b0;
+  bottom: 0px;
+  padding: 20px 1px;
+  text-align: center;
+  border-top: #7e91b0 1px solid;
+}
+  .friliActive{
+    color: #ffde00;
+  }
+  .frili:hover{
+    color: #ffde00;
+  }
 .r_part {
   margin-right: 10px;
   width: 20%;
@@ -1254,10 +1268,9 @@ export default {
   display: flex;
 }
 .chart, .img {
-  width: 84%;
-  height: 84vh;
-  top: 10vh;
-  left: 13%;
+  width: 86.5vw;
+  height: 100vh;
+  left: 13.5vw;
   margin: auto;
   position: absolute;
   border-radius: 10px;
@@ -1313,37 +1326,49 @@ export default {
     opacity: 0.8;
   }
   .sec {
-    width: 100%;
-    background: rgba(0,0,0,0.2);
+    width: 8vw;
+    height: 100vh;
+    top: 0px;
+    left: 13.5vw;
+    background: #2f5e99;
+    position: absolute;
     padding: 30px 0 0;
-    margin-top: -30px;
-    border-radius: 16px 16px 8px 8px;
+    display: none;
+    z-index: 1000;
   }
   .sec ul {
     font-size: 1rem;
     padding: 0;
     height: auto;
+    margin-top: 18vh;
     width: 100%;
     text-align: right;
   }
   .sec ul li {
-    padding: 4px 15px;
-    color: #e7e6e6;
-    cursor:pointer
+    padding: 10px 12px;
+    color: white;
+    cursor:pointer;
+    border-bottom: #446ea3 1px solid;
   }
   .sec ul li a {
-    color: #e7e6e6;
+    color: white;
   }
   .sec ul li:first-child {
     border-top: 0;
   }
   .sec ul li:hover {
-    border-left: 4px solid #e7e6e6;
-    background: #283748;
+    /*border-left: 4px solid #e7e6e6;*/
+    background: #dbab4f;
+    color: white;
+  }
+  .showm{
+    display: block!important;
   }
   .checked {
-    border-left: 4px solid #e7e6e6;
-    background: #283748;
+    /*border-left: 4px solid #e7e6e6;*/
+    /*background: #283748;*/
+    background: #dbab4f;
+    color: white;
   }
   .img {
     background-color: #fff;
@@ -1583,6 +1608,9 @@ export default {
     /*margin-left: 0;*/
     margin: 0 auto!important;
   }
+  .child_menu{
+    display: none;
+  }
   .tupl {
     position: absolute;
     top: 35vh;
@@ -1607,6 +1635,7 @@ export default {
     max-height: 60vh;
     text-align: left;
     position: relative;
+    margin-top: 9vh;
   }
   .big {
     /*transition: all .5s linear;*/
