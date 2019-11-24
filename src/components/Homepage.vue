@@ -15,11 +15,11 @@
     <div class="img" v-if="isshow">
       <div class="img_header"></div>
       <button class="aui_close" @click="imgclose">×</button>
-        <ul class="btn_menu" v-if="(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0)||imgtype==='euro'" style="position: absolute;left: 30px;top: 100px;z-index:500;">
+        <ul class="btn_menu" v-if="(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy')||imgtype==='euro'" style="position: absolute;left: 30px;top: 100px;z-index:500;">
           <li>
             <button class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
           </li>
-          <li v-if="imgtype!=='euro'">
+          <li v-if="(imgtype!=='euro')&&(imgtype!=='jpmqy'&&kind!==1)">
             <button class="btn2" :class="{bactive:krheight === 3&&imgtype!=='euro'}" @click="hanguoimg(3)">850hPa</button>
           </li>
           <li v-if="imgtype!=='euro'">
@@ -380,6 +380,7 @@ export default {
       }
     },
     hanguoimg (flag) {
+      // console.log(this.urllist.data)
       this.cleanpic()
       this.num = 0
       this.krheight = flag
@@ -387,13 +388,17 @@ export default {
       this.imgflag = this.urllist.data[flag].pic_name
       if (this.imgtype === 'kr') {
         if (this.krheight === 0) {
-          this.imgflag = this.urllist.data[flag].pic_name
+          this.imgurl = head + this.surf[0].url
+          this.imgflag = this.surf[0].pic_name
         } else if (this.krheight === 1) {
-          this.imgflag = this.urllist.data[flag].pic_name
+          this.imgurl = head + this.up50[0].url
+          this.imgflag = this.up50[0].pic_name
         } else if (this.krheight === 2) {
-          this.imgflag = this.urllist.data[flag].pic_name
+          this.imgurl = head + this.up70[0].url
+          this.imgflag = this.up70[0].pic_name
         } else if (this.krheight === 3) {
-          this.imgflag = this.urllist.data[flag].pic_name
+          this.imgurl = head + this.up85[0].url
+          this.imgflag = this.up85[0].pic_name
         }
       } else if (this.imgtype === 'jpnqy') {
         // this.imgurl = head + this.urllist.data[flag].url
@@ -500,6 +505,19 @@ export default {
                 this.up70.push(res.data.data[i])
               } else if (res.data.data[i].pic_name.substring(0, 3) === '850') {
                 this.up85.push(res.data.data[i])
+              }
+            }
+          }
+          if (type === 'jpnqy' && kind === 1) {
+            // console.log(res.data.data)
+            // console.log('2' + kind)
+            for (let i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].pic_name.substring(0, 3) === 'dm_') {
+                this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '50_') {
+                this.up50.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 3) === '78_') {
+                this.up70.push(res.data.data[i])
               }
             }
           }
@@ -1394,7 +1412,7 @@ export default {
   .img_container img{
     /*text-align: left!important;*/
     width: 60%;
-    max-height: 55vh;
+    max-height: 60vh;
     /*margin: 0 auto;*/
     margin-top: 5vh;
     margin-left: 15%;
@@ -1757,4 +1775,5 @@ export default {
  .dat {
     margin-left: 0
   }
+
 </style>

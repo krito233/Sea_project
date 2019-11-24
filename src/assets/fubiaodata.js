@@ -13,7 +13,7 @@ const wz = [{
 }, {
   stcd: 'wz04',
   stnm: '瑞安',
-  pos: [126.619000, 27.784700]
+  pos: [126.62, 27.77]
 }]
 const tw = [{
   stnm: '龙洞',
@@ -34,6 +34,20 @@ const tw = [{
   stcd: 'tw04',
   pos: [121.5758,
     22.0719]
+},
+{
+  type: 'point',
+  stnm: '金门',
+  stcd: 'jp05',
+  pos: [118.41,
+    24.38]
+},
+{
+  type: 'point',
+  stnm: '妈祖',
+  stcd: 'jp06',
+  pos: [120.51,
+    26.35]
 }]
 const jp = [{
   type: 'point',
