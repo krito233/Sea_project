@@ -13,7 +13,7 @@ const wz = [{
 }, {
   stcd: 'wz04',
   stnm: '瑞安',
-  pos: [126.62, 27.77]
+  pos: [120.62, 27.77]
 }]
 const tw = [{
   stnm: '龙洞',

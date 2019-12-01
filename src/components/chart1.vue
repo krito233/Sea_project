@@ -26,7 +26,7 @@
     <!--    <button class="bn" @click="tiptip=3">整体调整</button>-->
   </div>
 </template>
-<style>
+<style scoped>
   ul {
     list-style-type: none;
   }
@@ -89,8 +89,8 @@ import echarts from 'echarts'
 import axios from 'axios'
 import index from '../router'
 // var tiptip = 1
-var moren = 'http://test.qdwanzhong.top'
-//var moren = '..'
+// var moren = 'http://test.qdwanzhong.top'
+var moren = '..'
 export default {
   name: 'chart1',
   data () {

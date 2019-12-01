@@ -19,6 +19,9 @@
           <li>
             <button class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
           </li>
+          <li>
+            <button class="btn2" :class="{bactive:krheight === 4&&imgtype==='kr'&&kind===0}" @click="hanguoimg(4)">地面2</button>
+          </li>
           <li v-if="(imgtype!=='euro')&&(imgtype!=='jpmqy'&&kind!==1)">
             <button class="btn2" :class="{bactive:krheight === 3&&imgtype!=='euro'}" @click="hanguoimg(3)">850hPa</button>
           </li>
@@ -69,12 +72,12 @@
           <img v-if="imgtype!=='twyb'" @dblclick="isbigger = !isbigger" :src="imgurl"/>
           <p @click="nextimg" class="tupr" v-if="imgtype!=='twyb'"></p>
         </div>
-          <ul class="btn_menu">
+          <ul class="btn_menu mid">
             <li>
               <button v-if="imgtype==='twyb'" class="btn" @click="downloadimg(urllist.data)">下载图片</button>
             </li>
           </ul>
-        <ul class="btn_menu" v-if="imgtype !== 'twyb'&&imgtype!=='sd'">
+        <ul class="btn_menu foot" v-if="imgtype !== 'twyb'&&imgtype!=='sd'">
           <li>
             <button class="btn" @click="startimg">开始播放</button>
             <input id="speed" value="1"/>秒/页
@@ -84,7 +87,7 @@
         </ul>
         <div class="img_list" v-if="imgtype!=='twyb'&&imgtype!=='sd'">
           <p @click="beforeimg" class="tupu"></p>
-          <ul class="yulan">
+          <ul ref="yu" class="yulan">
             <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 0" v-for="(pic, index) in surf" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
               <p>{{pic.tm}}</p>
@@ -98,6 +101,10 @@
               <p>{{pic.tm}}</p>
             </li>
             <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 3" v-for="(pic, index) in up85" @click="clickimg(pic,index)">
+              <img :id="index" :src="head + pic.url"/>
+              <p>{{pic.tm}}</p>
+            </li>
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="imgtype==='kr'&&kind===0&&krheight === 4" v-for="(pic, index) in surf2" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
               <p>{{pic.tm}}</p>
             </li>
@@ -294,6 +301,7 @@ export default {
       head: head,
       imgflag: 0,
       surf: [],
+      surf2: [],
       up50: [],
       up70: [],
       up85: [],
@@ -313,7 +321,7 @@ export default {
       Ascatlist: [],
       jason2list: [],
       gjkind: 0,
-      showMenu:false,
+      showMenu: false,
     }
   },
   created () {
@@ -388,40 +396,54 @@ export default {
       this.imgflag = this.urllist.data[flag].pic_name
       if (this.imgtype === 'kr') {
         if (this.krheight === 0) {
+          this.imgurl = ''
           this.imgurl = head + this.surf[0].url
           this.imgflag = this.surf[0].pic_name
         } else if (this.krheight === 1) {
+          this.imgurl = ''
           this.imgurl = head + this.up50[0].url
           this.imgflag = this.up50[0].pic_name
         } else if (this.krheight === 2) {
+          this.imgurl = ''
           this.imgurl = head + this.up70[0].url
           this.imgflag = this.up70[0].pic_name
         } else if (this.krheight === 3) {
+          this.imgurl = ''
           this.imgurl = head + this.up85[0].url
           this.imgflag = this.up85[0].pic_name
+        } else if (this.krheight === 4) {
+          this.imgurl = ''
+          this.imgurl = head + this.surf2[0].url
+          this.imgflag = this.surf2[0].pic_name
         }
       } else if (this.imgtype === 'jpnqy') {
         // this.imgurl = head + this.urllist.data[flag].url
         // this.imgurl = head + this.urllist.data[flag].url
         // this.imgflag = head + this.urllist.data[flag].pic_name
         if (this.krheight === 0) {
+          this.imgurl = ''
           this.imgurl = head + this.surf[0].url
           this.imgflag = this.surf[0].pic_name
         } else if (this.krheight === 1) {
+          this.imgurl = ''
           this.imgurl = head + this.up50[0].url
           this.imgflag = this.up50[0].pic_name
         } else if (this.krheight === 2) {
+          this.imgurl = ''
           this.imgurl = head + this.up70[0].url
           this.imgflag = this.up70[0].pic_name
         } else if (this.krheight === 3) {
+          this.imgurl = ''
           this.imgurl = head + this.up85[0].url
           this.imgflag = this.up85[0].pic_name
         }
       } else if (this.imgtype === 'euro') {
         if (this.krheight === 0) {
+          this.imgurl = ''
           this.imgurl = head + this.surf[0].url
           this.imgflag = this.surf[0].pic_name
         } else if (this.krheight === 1) {
+          this.imgurl = ''
           this.imgurl = head + this.up50[0].url
           this.imgflag = this.up50[0].pic_name
         }
@@ -484,6 +506,8 @@ export default {
             for (let i = 0; i < res.data.data.length; i++) {
               if (res.data.data[i].pic_name.substring(0, 4) === 'surf') {
                 this.surf.push(res.data.data[i])
+              } else if (res.data.data[i].pic_name.substring(0, 4) === 'sfc3') {
+                this.surf2.push(res.data.data[i])
               } else if (res.data.data[i].pic_name.substring(0, 4) === 'up50') {
                 this.up50.push(res.data.data[i])
               } else if (res.data.data[i].pic_name.substring(0, 4) === 'up70') {
@@ -543,6 +567,10 @@ export default {
       this.imgurl = head + res.data.data[0].url
       this.urllist = res.data
       this.imgflag = res.data.data[0].pic_name
+      if (type === 'kr' && this.kind === 0) {
+        this.imgurl = head + res.data.data[6].url
+        this.imgflag = res.data.data[6].pic_name
+      }
       if (type === 'jpnqy' && this.kind === 0) {
         this.imgurl = head + res.data.data[3].url
         this.imgflag = res.data.data[3].pic_name
@@ -737,27 +765,38 @@ export default {
         if (this.imgtype !== 'kr' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro') {
           this.imgurl = head + this.urllist.data[this.num].url
           this.imgflag = this.urllist.data[this.num].pic_name
+          this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.urllist.data.length)
         } else if (this.imgtype === 'cnwave') {
           if (this.gjkind === 0) {
             this.imgurl = head + this.Ascatlist[this.num].url
             this.imgflag = this.Ascatlist[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.Ascatlist.length)
           } else if (this.gjkind === 1) {
             this.imgurl = head + this.jason2list[this.num].url
             this.imgflag = this.jason2list[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.jason2list.length)
           }
         } else {
           if (this.krheight === 0) {
             this.imgurl = head + this.surf[this.num].url
             this.imgflag = this.surf[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.surf.length)
           } else if (this.krheight === 1) {
-            this.imgurl = head + this.surf[this.num].url
+            this.imgurl = head + this.up50[this.num].url
             this.imgflag = this.up50[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.up50.length)
           } else if (this.krheight === 2) {
-            this.imgurl = head + this.surf[this.num].url
+            this.imgurl = head + this.up70[this.num].url
             this.imgflag = this.up70[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.up70.length)
           } else if (this.krheight === 3) {
-            this.imgurl = head + this.surf[this.num].url
+            this.imgurl = head + this.up85[this.num].url
             this.imgflag = this.up85[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.up85.length)
+          } else if (this.krheight === 4) {
+            this.imgurl = head + this.surf2[this.num].url
+            this.imgflag = this.surf2[this.num].pic_name
+            this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.surf2.length)
           }
         }
       } else {
@@ -786,13 +825,20 @@ export default {
           list = this.up70
         } else if (this.krheight === 3) {
           list = this.up85
+        } else if (this.krheight === 4) {
+          list = this.surf2
         }
       }
       if (this.num < list.length - 1) {
         this.num = this.num + 1
+        // document.querySelector('.chosed').focus()
         // console.log(this.num)
         this.imgurl = head + list[this.num].url
         this.imgflag = list[this.num].pic_name
+        // console.log(this.$refs.yu.scrollHeight)
+        // console.log(this.$refs.yu.scrollTop)
+        this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / list.length)
+        // document.getElementById(this.num).focus()
         // if (this.krheight === 0) {
         //   this.imgflag = this.surf[this.num].pic_name
         // } else if (this.krheight === 1) {
@@ -1412,12 +1458,23 @@ export default {
   .img_container img{
     /*text-align: left!important;*/
     width: 60%;
-    max-height: 60vh;
+    max-height: 70vh;
     /*margin: 0 auto;*/
     margin-top: 5vh;
     margin-left: 15%;
   }
+  .foot {
+    position: absolute;
+    top: 88vh;
+    width: 100%;
+  }
+  .mid {
+    position: absolute;
+    top: 80vh;
+    width: 100%;
+  }
   .btn_menu {
+    bottom: 0;
     margin-left: 0rem;
   }
   .btn_menu li {
@@ -1650,7 +1707,7 @@ export default {
     margin: 0 auto!important;
   }
   .tup {
-    max-height: 60vh;
+    max-height: 70vh;
     text-align: left;
     position: relative;
     margin-top: 9vh;
@@ -1683,7 +1740,7 @@ export default {
     overflow: auto;
   }
   .yulan::-webkit-scrollbar {
-    display: none;
+    /*display: none;*/
   }
   .yulan li {
     cursor: pointer;
@@ -1761,16 +1818,18 @@ export default {
     text-align: center
   }
   .getdate {
-    width: 50%;
+    position: absolute;
+    top: 93vh;
+    width: 100%;
     display: flex;
     margin: 0 auto;
-    padding: auto;
+    /*padding: auto;*/
     text-align: center;
   }
   .getdate div {
     /* margin: 0 auto; */
     cursor: pointer;
-    width: 75%;
+    width: 60%;
   }
  .dat {
     margin-left: 0

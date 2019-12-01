@@ -1,8 +1,8 @@
 import axios from 'axios'
 //本地测试
- const head = 'http://test.qdwanzhong.top/'
+const head = 'http://test.qdwanzhong.top/'
 //线上
-//const head = '../'
+// const head = '../'
 
 function request (config) {
   const geturl = axios.create({
