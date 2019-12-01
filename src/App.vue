@@ -139,4 +139,25 @@ export default {
     transition: all 0.2s ease-out;
     opacity: 0.8;
   }
+  #start, #end {
+    /*width: 4rem;*/
+    color: #fff;
+    padding: 0.2rem 0;
+    /*color: white;*/
+    background-color: #344e76;
+    border-radius: 4px;
+    margin-left: 30px;
+  }
+  input::-webkit-input-placeholder{
+    color:#fff;
+  }
+  input::-moz-placeholder{   /* Mozilla Firefox 19+ */
+    color:#fff;
+  }
+  input:-moz-placeholder{    /* Mozilla Firefox 4 to 18 */
+    color:#fff;
+  }
+  input:-ms-input-placeholder{  /* Internet Explorer 10-11 */
+    color:#fff;
+  }
 </style>

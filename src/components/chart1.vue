@@ -26,7 +26,7 @@
     <!--    <button class="bn" @click="tiptip=3">整体调整</button>-->
   </div>
 </template>
-<style>
+<style scoped>
   ul {
     list-style-type: none;
   }
