@@ -6,7 +6,7 @@
     <!--<p v-if="isshowfubiao" class="radartit">{{fubiaoinfo}}</p>-->
     <div class="zuo">
       <img v-if="istuli" class="tuli" src="../../assets/tuli.png"/>
-      <p class="copyright">青岛海之声科技有限公司技术服务</p>
+<!--      <p class="copyright">青岛海之声科技有限公司技术服务</p>-->
     </div>
     <div id="volet_clos">
       <div id="volet" :class="{activex:isshowfubiaowin}" style="text-align: center;color: black">
@@ -31,7 +31,7 @@
             <td v-if="fubiaotype!=='wz'">{{info.lx}}</td>
           </tr>
         </table>
-        <p style="margin-top: 10px;">历史浪高图</p>
+        <p style="margin-top: 4vh;">历史浪高图</p>
         <div id="container2" class="chartClass" style="width: 25vw; height: 20vh;"></div>
 
       </div>
@@ -829,10 +829,10 @@ export default {
 
 <style scoped>
   .container {
-    width: 85%;
-    height: 88vh;
-    top: 10vh;
-    left: 14%;
+    width: 86.5%;
+    height: 100vh;
+    top: 0;
+    left: 13.5%;
     position: relative;
     background: linear-gradient(135deg, transparent $tl, $bg 0) top left;
     /*text-align: center;*/
@@ -888,7 +888,7 @@ export default {
   }
   #volet_clos {
     position: fixed;
-    top: 160px;
+    top: 80px;
     right: 0;
   }
   #volet span {
@@ -907,7 +907,7 @@ export default {
     overflow: auto;
   }
   #container2{
-    margin-top: 5vh;
+    margin-top: 8vh;
   }
   table{
     border-spacing: 0px!important;
