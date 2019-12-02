@@ -32,7 +32,7 @@
           </tr>
         </table>
         <p style="margin-top: 4vh;">历史浪高图</p>
-        <div id="container2" class="chartClass" style="width: 25vw; height: 20vh;"></div>
+        <div id="container2" class="chartClass"></div>
 
       </div>
     </div>
@@ -462,7 +462,16 @@ export default {
         xAxis: {
           type: 'category',
           data: this_.dataTList.reverse(),
-          name: ''
+          name: '',
+          axisLabel : {
+
+            formatter: function(){
+
+              return "";
+
+            }
+
+          },
           //   (function () {
           //  if(k === 2){
           //    return this_.dataTList.reverse()
@@ -473,12 +482,18 @@ export default {
         },
         yAxis: {
           type: 'value',
-          name: ''
+          name: '潮位/m',
+          max:function(value){
+            return parseInt(value.max)+1;
+          },
+          min:function(value){
+            return parseInt(value.min)-1;
+          },
         },
         grid: {
           left: '10%',
           right: '5%',
-          top: '5%',
+          top: '20%',
           bottom: '5%'
         },
         tooltip: {
@@ -908,6 +923,8 @@ export default {
   }
   #container2{
     margin-top: 8vh;
+    width: 25vw;
+    height: 26vh;
   }
   table{
     border-spacing: 0px!important;
@@ -965,6 +982,7 @@ export default {
     -moz-transition: all .5s ease-in;
     transition: all .5s ease-in;
     min-height: 400px;
+    box-shadow: #95a1ad 3px 3px;
   }
   #volet a.ouvrir,
   #volet a.fermer {

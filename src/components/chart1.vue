@@ -89,8 +89,8 @@ import echarts from 'echarts'
 import axios from 'axios'
 import index from '../router'
 // var tiptip = 1
-var moren = 'http://test.qdwanzhong.top'
-//var moren = '..'
+//var moren = 'http://test.qdwanzhong.top'
+var moren = '..'
 export default {
   name: 'chart1',
   data () {
@@ -191,6 +191,9 @@ export default {
           }
         },
         legend: {
+          show: true,
+          inactiveColor: 'white',
+          type: 'scroll',
           data: ['预测值修正版', '预测值实测版'],
           textStyle: {
             // color: 'white'
@@ -252,6 +255,20 @@ export default {
               return '潮位/米'
             }
           })(),
+          max:function(value){
+            if (this_.szyb === 'hl'|| this_.szyb === 'hw') {
+              return parseInt((parseInt(value.max*100)/100+0.2)*100)/100;
+            } else if (this_.szyb === 'cx') {
+              return parseInt((parseInt(value.max*100)/100+0.5)*100)/100;
+            }
+          },
+          min:function(value){
+            if (this_.szyb === 'hl'|| this_.szyb === 'hw') {
+              return parseInt((parseInt(value.min*100)/100-0.2)*100)/100;
+            } else if (this_.szyb === 'cx') {
+              return parseInt((parseInt(value.min*100)/100-0.5)*100)/100;
+            }
+          },
           nameTextStyle:{fontSize: 14},
           axisLabel: {
             textStyle: {

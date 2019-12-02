@@ -176,7 +176,6 @@
         <li :class="{checked:checked === '日本波浪图'}" @click="allclear(),checked='日本波浪图',getimgurl('jpnbl', 1)">日本波浪图</li>
         <li :class="{checked:checked === '国家波浪图'}" @click="allclear(),checked='国家波浪图',getimgurl('cnhailang', 1)">国家波浪图</li>
         <li :class="{checked:checked === '日本波浪传真图'}" @click="allclear(),checked='日本波浪传真图',getimgurl('jpnblcz', 1)">日本波浪传真图</li>
-<<<<<<< HEAD
       </ul>
     </div>
     <div class="sec" :class="{down:ismenu3}">
@@ -205,36 +204,6 @@
         <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
       </ul>
     </div>
-=======
-      </ul>
-    </div>
-    <div class="sec" :class="{down:ismenu3}">
-      <ul class="">
-        <li :class="{checked:checked === '台湾天气图'}" @click="allclear(),checked='台湾天气图',getimgurl('twyb', 0)">台湾一周预报</li>
-        <li :class="{checked:checked === '日本天气图'}" @click="allclear(),checked='日本天气图',getimgurl('jpn', 1)">日本一周预报</li>
-        <li :class="{checked:checked === '欧洲中心'}" @click="allclear(),checked = '欧洲中心',getimgurl('euro', 0)">欧洲中心</li>
-      </ul>
-    </div>
-    <div class="sec" :class="{down:ismenu4}">
-      <ul class="">
-        <li :class="{checked:checked === '国家波浪遥感图'}" @click="allclear(),checked='国家波浪遥感图',getimgurl('cnwave', 0)">国家波浪遥感图</li>
-        <li :class="{checked:checked === '国家海浪图'}" @click="allclear(),checked='国家海浪图',getimgurl('cnhailang', 0)">国家海浪图</li>
-        <li :class="{checked:checked === '国家水温图'}" @click="allclear(),checked='国家水温图',getimgurl('cnsw', 0)">国家水温图</li>
-        <!--<li :class="{checked:checked === '日本天气图3'}" @click="allclear(),checked='日本天气图3',getimgurl('jpnqy', 0)">日本天气图</li>-->
-        <li :class="{checked:checked === '台风路径'}" @click="givelist">台风路径</li>
-      </ul>
-    </div>
-    <div class="sec" :class="{down:ismenu5}">
-      <ul class="">
-        <li :class="{checked:checked === '海浪预报'}" @click="ybWatch(0)">海浪预报</li>
-        <li :class="{checked:checked === '海温预报'}" @click="ybWatch(1)">海温预报</li>
-        <li :class="{checked:checked === '潮汐预报'}" @click="ybWatch(2)">潮汐预报</li>
-        <!--<li :class="{checked:checked === '海浪预报'}" @click="">海浪预报</li>-->
-        <!--<li :class="{checked:checked === '海温预报'}" @click="allclear(),checked='海温预报',showchart(1)">海温预报</li>-->
-        <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
-      </ul>
-    </div>
->>>>>>> 1f300fb10b641d4f75e3919ac156ce175dbdbead
     <div class="sec" :class="{down:ismenu6}">
       <ul>
         <li :class="{checked:checked === '手动获取图片'}" @click="allclear(),checked='手动获取图片',winopen = true,isshow = !isshow,imgtype='sd'">手动获取图片</li>
@@ -352,11 +321,7 @@ export default {
       Ascatlist: [],
       jason2list: [],
       gjkind: 0,
-<<<<<<< HEAD
-      showMenu:false,
-=======
       showMenu: false,
->>>>>>> 1f300fb10b641d4f75e3919ac156ce175dbdbead
     }
   },
   created () {
@@ -1752,7 +1717,7 @@ export default {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 80vw;
     height: 100vh;
     z-index: 999;
   }
