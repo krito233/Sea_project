@@ -311,7 +311,10 @@ export default {
         list = this.jp
       }
       request({
-        url: url
+        url: url,
+        params: {
+          day: 2
+        }
       }).then(res => {
         console.log('获取成功')
         // console.log(res.data.jpn.data[0].items[0].lx.length)
@@ -344,7 +347,9 @@ export default {
                 let this_ = _this
                 request({
                   url: '/thirdparty/tpdata/fb.do',
-                  params: {day: 2}
+                  params: {
+                    day: 2
+                  }
                 }).then(res2 => {
                   // console.log(res2.data.tw.data[i].items)
                   this_.dataList = null

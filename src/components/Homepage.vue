@@ -19,8 +19,8 @@
           <li>
             <button class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
           </li>
-          <li>
-            <button class="btn2" :class="{bactive:krheight === 4&&imgtype==='kr'&&kind===0}" @click="hanguoimg(4)">地面2</button>
+          <li v-if="imgtype==='kr'&&kind===0">
+            <button class="btn2" :class="{bactive:krheight === 4}" @click="hanguoimg(4)">地面2</button>
           </li>
           <li v-if="(imgtype!=='euro')&&(imgtype!=='jpmqy'&&kind!==1)">
             <button class="btn2" :class="{bactive:krheight === 3&&imgtype!=='euro'}" @click="hanguoimg(3)">850hPa</button>
@@ -88,37 +88,45 @@
         <div class="img_list" v-if="imgtype!=='twyb'&&imgtype!=='sd'">
           <p @click="beforeimg" class="tupu"></p>
           <ul ref="yu" class="yulan">
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 0" v-for="(pic, index) in surf" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'))&&krheight === 0" v-for="(pic, index) in surf" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 1" v-for="(pic, index) in up50" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype==='euro'||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'))&&krheight === 1" v-for="(pic, index) in up50" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 2" v-for="(pic, index) in up70" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='jpnqy'&&kind===1)||(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 2" v-for="(pic, index) in up70" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
             <li :class="{chosed:imgflag === pic.pic_name}" v-if="((imgtype==='kr'&&kind===0)||(imgtype==='jpnqy'&&kind===0))&&krheight === 3" v-for="(pic, index) in up85" @click="clickimg(pic,index)">
               <img :id="index" :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
             <li :class="{chosed:imgflag === pic.pic_name}" v-if="imgtype==='kr'&&kind===0&&krheight === 4" v-for="(pic, index) in surf2" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
             <li :class="{chosed:imgflag === pic.pic_name}" v-if="imgtype==='cnwave'&&gjkind === 0" v-for="(pic, index) in Ascatlist" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
             <li :class="{chosed:imgflag === pic.pic_name}" v-if="imgtype==='cnwave'&&gjkind === 1" v-for="(pic, index) in jason2list" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="imgtype!=='euro'&&kind!==1">{{pic.tm}}</p>
+              <p v-if="imgtype==='euro'||kind===1">{{pic.ybtm}}</p>
             </li>
-            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype!=='euro'&&imgtype !== 'kr'&&imgtype!=='jpnqy'&&imgtype!=='cnwave')||(imgtype==='kr'&&kind===1)||(imgtype==='jpnqy'&&kind===1)" v-for="(pic, index) in urllist.data" @click="clickimg(pic,index)">
+            <li :class="{chosed:imgflag === pic.pic_name}" v-if="(imgtype!=='euro'&&imgtype !== 'kr'&&imgtype!=='jpnqy'&&imgtype!=='cnwave')||(imgtype==='kr'&&kind===1)" v-for="(pic, index) in urllist.data" @click="clickimg(pic,index)">
               <img :src="head + pic.url"/>
-              <p>{{pic.tm}}</p>
+              <p v-if="kind!==1">{{pic.tm}}</p>
+              <p v-if="kind===1">{{pic.ybtm}}</p>
             </li>
           </ul>
           <p @click="nextimg" class="tupd"></p>
@@ -176,7 +184,6 @@
         <li :class="{checked:checked === '日本波浪图'}" @click="allclear(),checked='日本波浪图',getimgurl('jpnbl', 1)">日本波浪图</li>
         <li :class="{checked:checked === '国家波浪图'}" @click="allclear(),checked='国家波浪图',getimgurl('cnhailang', 1)">国家波浪图</li>
         <li :class="{checked:checked === '日本波浪传真图'}" @click="allclear(),checked='日本波浪传真图',getimgurl('jpnblcz', 1)">日本波浪传真图</li>
-<<<<<<< HEAD
       </ul>
     </div>
     <div class="sec" :class="{down:ismenu3}">
@@ -205,36 +212,6 @@
         <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
       </ul>
     </div>
-=======
-      </ul>
-    </div>
-    <div class="sec" :class="{down:ismenu3}">
-      <ul class="">
-        <li :class="{checked:checked === '台湾天气图'}" @click="allclear(),checked='台湾天气图',getimgurl('twyb', 0)">台湾一周预报</li>
-        <li :class="{checked:checked === '日本天气图'}" @click="allclear(),checked='日本天气图',getimgurl('jpn', 1)">日本一周预报</li>
-        <li :class="{checked:checked === '欧洲中心'}" @click="allclear(),checked = '欧洲中心',getimgurl('euro', 0)">欧洲中心</li>
-      </ul>
-    </div>
-    <div class="sec" :class="{down:ismenu4}">
-      <ul class="">
-        <li :class="{checked:checked === '国家波浪遥感图'}" @click="allclear(),checked='国家波浪遥感图',getimgurl('cnwave', 0)">国家波浪遥感图</li>
-        <li :class="{checked:checked === '国家海浪图'}" @click="allclear(),checked='国家海浪图',getimgurl('cnhailang', 0)">国家海浪图</li>
-        <li :class="{checked:checked === '国家水温图'}" @click="allclear(),checked='国家水温图',getimgurl('cnsw', 0)">国家水温图</li>
-        <!--<li :class="{checked:checked === '日本天气图3'}" @click="allclear(),checked='日本天气图3',getimgurl('jpnqy', 0)">日本天气图</li>-->
-        <li :class="{checked:checked === '台风路径'}" @click="givelist">台风路径</li>
-      </ul>
-    </div>
-    <div class="sec" :class="{down:ismenu5}">
-      <ul class="">
-        <li :class="{checked:checked === '海浪预报'}" @click="ybWatch(0)">海浪预报</li>
-        <li :class="{checked:checked === '海温预报'}" @click="ybWatch(1)">海温预报</li>
-        <li :class="{checked:checked === '潮汐预报'}" @click="ybWatch(2)">潮汐预报</li>
-        <!--<li :class="{checked:checked === '海浪预报'}" @click="">海浪预报</li>-->
-        <!--<li :class="{checked:checked === '海温预报'}" @click="allclear(),checked='海温预报',showchart(1)">海温预报</li>-->
-        <!--<li :class="{checked:checked === '潮汐预报'}" @click="allclear(),checked='潮汐预报',showchart(2)">潮汐预报</li>-->
-      </ul>
-    </div>
->>>>>>> 1f300fb10b641d4f75e3919ac156ce175dbdbead
     <div class="sec" :class="{down:ismenu6}">
       <ul>
         <li :class="{checked:checked === '手动获取图片'}" @click="allclear(),checked='手动获取图片',winopen = true,isshow = !isshow,imgtype='sd'">手动获取图片</li>
@@ -352,11 +329,7 @@ export default {
       Ascatlist: [],
       jason2list: [],
       gjkind: 0,
-<<<<<<< HEAD
-      showMenu:false,
-=======
       showMenu: false,
->>>>>>> 1f300fb10b641d4f75e3919ac156ce175dbdbead
     }
   },
   created () {
@@ -611,8 +584,8 @@ export default {
         this.imgflag = res.data.data[3].pic_name
       }
       if (type === 'euro') {
-        this.imgurl = head + res.data.data[1].url
-        this.imgflag = res.data.data[1].pic_name
+        this.imgurl = head + res.data.data[0].url
+        this.imgflag = res.data.data[0].pic_name
       }
     },
     typhoon (tfbh) {
@@ -682,7 +655,7 @@ export default {
     },
     changepic (i) {
       let tnum = 0
-      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro')) {
+      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro')) {
         this.imgurl = head + this.urllist.data[i].url
         this.imgflag = this.urllist.data[i].pic_name
         tnum = this.urllist.data.length
@@ -797,7 +770,7 @@ export default {
       if (this.num > 0) {
         this.num = this.num - 1
         // this.imgurl = head + this.urllist.data[this.num].url
-        if (this.imgtype !== 'kr' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro') {
+        if ((this.imgtype === 'kr' && this.kind===1) && this.imgtype !== 'cnwave' && this.imgtype !== 'euro') {
           this.imgurl = head + this.urllist.data[this.num].url
           this.imgflag = this.urllist.data[this.num].pic_name
           this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.urllist.data.length)
@@ -843,7 +816,7 @@ export default {
       // console.log(this.urllist.data.length)
       // console.log(this.urllist.data)
       let list = []
-      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype === 'jpnqy' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro')) {
+      if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype !== 'kr' && this.imgtype !== 'jpnqy' && this.imgtype !== 'cnwave' && this.imgtype !== 'euro')) {
         list = this.urllist.data
       } else if (this.imgtype === 'cnwave') {
         if (this.gjkind === 0) {
@@ -1775,10 +1748,11 @@ export default {
     overflow: auto;
   }
   .yulan::-webkit-scrollbar {
-    /*display: none;*/
+    display: none;
   }
   .yulan li {
     cursor: pointer;
+    margin-top: 10px;
     padding-top: 15px;
   }
   .yulan li img {
@@ -1787,6 +1761,7 @@ export default {
   .yulan li p {
     color: #000;
     font-size: 1rem;
+    padding: 6px 0;
   }
   .chosed {
     background: #344e76;
