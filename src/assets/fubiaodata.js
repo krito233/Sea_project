@@ -44,7 +44,7 @@ const tw = [{
 },
 {
   type: 'point',
-  stnm: '妈祖',
+  stnm: '马祖',
   stcd: 'jp06',
   pos: [120.51,
     26.35]

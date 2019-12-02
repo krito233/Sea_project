@@ -181,7 +181,7 @@ export default {
           formatter: function (params) {
             var dataIndex = params.dataIndex
             if (this_.szyb === 'hl') {
-              return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + parseInt(params[0].value[1] * 100) / 100 + '米'
+              return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + parseInt(params[0].value[1] * 10) / 10 + '米'
             } else if (this_.szyb === 'hw') {
               return '时间: ' + params[0].axisValue + '<br>温度数值: ' + parseInt(params[0].value[1] * 10) / 10 + '℃'
             } else if (this_.szyb === 'cx') {
@@ -259,14 +259,14 @@ export default {
             if (this_.szyb === 'hl'|| this_.szyb === 'hw') {
               return parseInt((parseInt(value.max*100)/100+0.2)*100)/100;
             } else if (this_.szyb === 'cx') {
-              return parseInt((parseInt(value.max*100)/100+0.5)*100)/100;
+              return parseInt((parseInt(value.max*100)/100+2)*100)/100;
             }
           },
           min:function(value){
             if (this_.szyb === 'hl'|| this_.szyb === 'hw') {
               return parseInt((parseInt(value.min*100)/100-0.2)*100)/100;
             } else if (this_.szyb === 'cx') {
-              return parseInt((parseInt(value.min*100)/100-0.5)*100)/100;
+              return parseInt((parseInt(value.min*100)/100-2)*100)/100;
             }
           },
           nameTextStyle:{fontSize: 14},
@@ -609,7 +609,7 @@ export default {
             tm: this.yuanShi[i].tm,
             zq: this.yuanShi[i].zq,
             lx: this.yuanShi[i].lx,
-            bg: parseInt(this.data_a[i][1] * 100) / 100,
+            bg: parseInt(this.data_a[i][1] * 10) / 10,
             stcd: this.yuanShi[i].stcd,
             type: '1'
           }
