@@ -578,12 +578,31 @@ export default {
       this.urllist = res.data
       this.imgflag = res.data.data[0].pic_name
       if (type === 'kr' && this.kind === 0) {
-        this.imgurl = head + res.data.data[6].url
-        this.imgflag = res.data.data[6].pic_name
+        for (let i = 0; i < res.data.data.length; i++) {
+          if (res.data.data[i].pic_name.substring(0, 4) === 'surf') {
+            this.imgurl = head + res.data.data[i].url
+            this.imgflag = res.data.data[i].pic_name
+            break
+          }
+        }
+      }
+      if (type === 'cnwave') {
+        for (let i = 0; i < res.data.data.length; i++) {
+          if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length) === 't.png') {
+            this.imgurl = head + res.data.data[i].url
+            this.imgflag = res.data.data[i].pic_name
+            break
+          }
+        }
       }
       if (type === 'jpnqy' && this.kind === 0) {
-        this.imgurl = head + res.data.data[3].url
-        this.imgflag = res.data.data[3].pic_name
+        for (let i = 0; i < res.data.data.length; i++) {
+          if (res.data.data[i].pic_name.substring(0, 3) === 'dim') {
+            this.imgurl = head + res.data.data[i].url
+            this.imgflag = res.data.data[i].pic_name
+            break
+          }
+        }
       }
       if (type === 'euro') {
         this.imgurl = head + res.data.data[0].url
@@ -785,7 +804,7 @@ export default {
       if (this.num > 0) {
         this.num = this.num - 1
         // this.imgurl = head + this.urllist.data[this.num].url
-        if ((this.imgtype === 'kr' && this.kind===1) && this.imgtype !== 'cnwave' && this.imgtype !== 'euro') {
+        if ((this.imgtype === 'kr' && this.kind === 1) || (this.imgtype !== 'cnwave' && this.imgtype !== 'euro' && this.imgtype !== 'kr'&& this.imgtype !== 'jpnqy')) {
           this.imgurl = head + this.urllist.data[this.num].url
           this.imgflag = this.urllist.data[this.num].pic_name
           this.$refs.yu.scrollTop = this.num * (this.$refs.yu.scrollHeight / this.urllist.data.length)
