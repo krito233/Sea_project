@@ -133,8 +133,10 @@
           <p @click="nextimg" class="tupd"></p>
         </div>
         <div class="getdate">
-          <date ref="vdate" v-if="checked!=='韩国天气图2'&&checked!=='日本天气图2'&&checked!=='日本波浪图'&&checked!=='国家波浪图'&&checked!=='日本波浪传真图'&&checked!=='手动获取图片'&&checked!=='台湾天气图'"/>
-          <button @click="historyimg" class="btn dat" v-if="checked!=='韩国天气图2'&&checked!=='日本天气图2'&&checked!=='日本波浪图'&&checked!=='国家波浪图'&&checked!=='日本波浪传真图'&&checked!=='手动获取图片'&&checked!=='台湾天气图'">获取</button>
+          <div class="date_container">
+            <date ref="vdate" v-if="checked!=='韩国天气图2'&&checked!=='日本天气图2'&&checked!=='日本波浪图'&&checked!=='国家波浪图'&&checked!=='日本波浪传真图'&&checked!=='手动获取图片'&&checked!=='台湾天气图'"/>
+            <button @click="historyimg" class="btn dat" v-if="checked!=='韩国天气图2'&&checked!=='日本天气图2'&&checked!=='日本波浪图'&&checked!=='国家波浪图'&&checked!=='日本波浪传真图'&&checked!=='手动获取图片'&&checked!=='台湾天气图'">获取</button>
+          </div>
         </div>
         <div class="sdtz" v-if="imgtype==='sd'">
             <div class="srwz"><p>请输入网址</p><input type="text" v-model="searchUrl"><button class="getImg" @click="getImg(searchUrl)">获取</button></div>
@@ -1869,20 +1871,28 @@ export default {
   }
   .getdate {
     position: absolute;
-    top: 93vh;
+    top: 94vh;
     width: 100%;
     display: flex;
     margin: 0 auto;
     /*padding: auto;*/
     text-align: center;
   }
-  .getdate div {
-    /* margin: 0 auto; */
+  .date_container {
+    display: flex;
+    margin: 0 auto;
     cursor: pointer;
-    width: 60%;
+    width: auto;
+    text-align: center;
   }
+  .date_container div {
+    margin: 0;
+  }
+  /*.date_container div input {*/
+  /*  margin: 15px!important;*/
+  /*}*/
  .dat {
-    margin-left: 0
+    margin-left: 20px;
   }
 
 </style>
