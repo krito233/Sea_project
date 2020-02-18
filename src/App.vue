@@ -148,6 +148,16 @@ export default {
     border-radius: 4px;
     margin-left: 30px;
   }
+  #start1, #end1 {
+    width: 10vw;
+    color: #000;
+    /*padding: 0.2rem 0;*/
+    /*color: white;*/
+    /*background-color: #344e76;*/
+    border-radius: 4px;
+    /*margin-left: 30px;*/
+    border: 1px solid #000;
+  }
   input::-webkit-input-placeholder{
     color:#fff;
   }

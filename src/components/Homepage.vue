@@ -221,37 +221,6 @@
       </ul>
     </div>
     </div>
-    <!--<div class="r_part">-->
-      <!--<ul>-->
-        <!--<li>-->
-          <!--<img :src="hanguourl"/>-->
-          <!--<div class="footer">-->
-            <!--<p style="margin-left: 10px;width: 70%;">韩国天气图</p>-->
-            <!--<p @click="getimgurl('kr', 0)" style="text-align: right;width: 25%;">放大></p>-->
-          <!--</div>-->
-        <!--</li>-->
-        <!--<li>-->
-          <!--<img :src="japanurl"/>-->
-          <!--<div class="footer">-->
-            <!--<p style="margin-left: 10px;width: 70%;">日本海浪图</p>-->
-            <!--<p @click="getimgurl('jpn', 1)" style="text-align: right;width: 25%;">放大></p>-->
-          <!--</div>-->
-        <!--</li>-->
-        <!--<li>-->
-          <!--<img :src="cnurl"/>-->
-          <!--<div class="footer">-->
-            <!--<p style="margin-left: 10px;width: 70%;">国家波浪图</p>-->
-            <!--<p @click="getimgurl('cnhailang', 1)" style="text-align: right;width: 25%;">放大></p>-->
-          <!--</div>-->
-        <!--</li>-->
-      <!--</ul>-->
-    <!--</div>-->
-    <!--<div class="tf" style="position: absolute;top: 90px;right: 23%;z-index: 9;">-->
-      <!--<a>台风路径</a>-->
-      <!--<ul class="tf_list">-->
-        <!--<li v-for="(ty, i) in tylist" @click="typhoon(ty.tfbh)">{{ty.name}}</li>-->
-      <!--</ul>-->
-    <!--</div>-->
     <div id="volet_clos">
       <div id="volet" :class="{'active2':checked === '台风路径'}" style="text-align: center">
         <span style="float: left">清除路径</span><span @click="closety" style="margin-left: 4rem;">></span>
@@ -1807,6 +1776,9 @@ export default {
   }
   .chosed {
     background: #344e76;
+  }
+  .chosed p {
+    color: #fff!important;
   }
   .cebian {
     display: none;

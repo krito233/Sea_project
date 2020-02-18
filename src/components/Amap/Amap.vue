@@ -1,5 +1,49 @@
 <template>
   <div class="container">
+    <div class="fw" v-if="mode===1">
+      <div class="his">
+        <div class="header">
+          <div class="tit">浮标历史数据查询</div>
+          <button class="aui_close" @click="changemode(0)">×</button>
+        </div>
+        <div class="main">
+          <div class="top">
+            <div class="lead">时间：</div>
+            <vdate ref="tdate" style="width: 50%"/>
+            <div class="lead">站点：</div>
+            <div class="select">
+              <select id="selectMethod" v-model="fub">
+                <option :value="fb.stcd" v-if="fubiaotype==='tw'" v-for="fb in tw">{{fb.stnm}}</option>
+                <option :value="fb.stcd" v-if="fubiaotype==='wz'" v-for="fb in wz">{{fb.stnm}}</option>
+                <option :value="fb.stcd" v-if="fubiaotype==='jp'" v-for="fb in jp">{{fb.stnm}}</option>
+              </select>
+            </div>
+            <div class="search" @click="search">搜索</div>
+            <div class="search" @click="tableToExcel">下载</div>
+          </div>
+          <div class="table">
+            <table class="table_a">
+              <tr>
+                <th>时间</th>
+                <th v-if="fubiaotype==='wz'">潮位</th>
+                <th v-if="fubiaotype==='wz'">警戒值</th>
+                <th v-if="fubiaotype!=='wz'">波浪周期</th>
+                <th v-if="fubiaotype!=='wz'">浪高</th>
+                <th v-if="fubiaotype!=='wz'">浪向</th>
+              </tr>
+              <tr v-for="(info, index) in tblist">
+                <td>{{info.tm}}</td>
+                <td v-if="fubiaotype==='wz'">{{info.val}}</td>
+                <td v-if="fubiaotype==='wz'">{{info.wrz}}</td>
+                <td v-if="fubiaotype!=='wz'">{{info.blzq}}</td>
+                <td v-if="fubiaotype!=='wz'">{{info.lg}}</td>
+                <td v-if="fubiaotype!=='wz'">{{info.lx}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="allmap"></div>
     <p v-if="iscloud" class="radartit">{{time}}</p>
     <p v-if="israder" class="radartit">{{time}}</p>
@@ -11,8 +55,8 @@
     <div id="volet_clos">
       <div id="volet" :class="{activex:isshowfubiaowin}" style="text-align: center;color: black">
         <p>{{fbname}}</p>
-        <p v-if="mode===0" style="cursor: pointer;float:right;color:rgb(68,114,196);font-size: 1rem;" @click="changemode(1)">三天内历史数据</p>
-        <p v-if="mode===1" style="cursor: pointer;float:right;color:rgb(68,114,196);font-size: 1rem;" @click="changemode(0)">收起</p>
+        <p style="cursor: pointer;float:right;color:rgb(68,114,196);font-size: 1rem;" @click="changemode(1)">历史数据查询</p>
+<!--        <p v-if="mode===1" style="cursor: pointer;float:right;color:rgb(68,114,196);font-size: 1rem;" @click="changemode(0)">收起</p>-->
         <table class="table_tw">
           <tr>
             <th>时间</th>
@@ -22,7 +66,7 @@
             <th v-if="fubiaotype!=='wz'">浪高</th>
             <th v-if="fubiaotype!=='wz'">浪向</th>
           </tr>
-          <tr v-for="(info, index) in fubiaoinfo" v-if="(mode===0&&index<3)||(mode===1&&index<72)">
+          <tr v-for="(info, index) in fubiaoinfo" v-if="index<3">
             <td>{{info.tm}}</td>
             <td v-if="fubiaotype==='wz'">{{info.val}}</td>
             <td v-if="fubiaotype==='wz'">{{info.wrz}}</td>
@@ -33,7 +77,6 @@
         </table>
         <p style="margin-top: 4vh;">历史浪高图</p>
         <div id="container2" class="chartClass"></div>
-
       </div>
     </div>
   </div>
@@ -45,12 +88,15 @@ import {request, head} from '../../net/request'
 import {tw, wz, jp} from '../../assets/fubiaodata'
 import chart1 from '../chart1'
 import echarts from 'echarts'
+import vdate from './vdate'
+import laydate from '../../../static/laydate/laydate.js'
 // import  from 'iview/src/components/checkbox'
 
 export default {
   name: 'AMap',
   components: {
-    chart1
+    chart1,
+    vdate
   },
   data () {
     return {
@@ -90,10 +136,26 @@ export default {
       fubiaoinfo: [],
       fbname: '',
       jpfbimg: '',
-      mode: 0
+      mode: 0,
+      startdate: null,
+      enddate: null,
+      fub: '',
+      tblist: ''
     }
   },
   mounted () {
+    laydate.render({
+      elem: '#start1',
+      done: (value) => {
+        this.startdate = value
+      }
+    })
+    laydate.render({
+      elem: '#end1',
+      done: (value) => {
+        this.enddate = value
+      }
+    })
     console.log(this.myMap)
     this.initAmap()
     console.log('加载了')
@@ -245,6 +307,7 @@ export default {
               _this.mode = 0
               // console.log(this.getExtData().index)
               this_.fbname = this.getExtData().job.stnm
+              this_.fub = this.getExtData().job.stnm
               request({
                 url: '/thirdparty/tpdata/wz.do',
                 params: {day: 2}
@@ -337,6 +400,7 @@ export default {
               _this.mode = 0
               _this.isshowfubiaowin = true
               _this.fbname = this.getExtData().job.stnm
+              _this.fub = this.getExtData().job.stnm
               for (let j = 0; j < _this.fubiaoList.length; j++) {
                 _this.fubiaoList[j].setLabel(null)
                 _this.fubiaoList[j].setzIndex(1)
@@ -842,6 +906,72 @@ export default {
     },
     changemode (flag) {
       this.mode = flag
+      this.tblist = this.fubiaoinfo
+    },
+    search () {
+      this.startTime = this.$refs['tdate'].startdate
+      this.endTime = this.$refs['tdate'].enddate
+      if (this.fubiaotype === 'wz') {
+        console.log(this.fub)
+        console.log(this.startTime)
+        request({
+          url: '/thirdparty/tpdata/wz.do',
+          params: {
+            stcd: this.fub,
+            startTime: this.startTime + ' 00:00:00',
+            endTime: this.endTime + ' 23:00:00'
+          }
+        }).then(res => {
+          console.log(res)
+          for (let i = 0; i < res.data.data.length; i++) {
+            if (this.fub === res.data.data[i].stcd) {
+              this.tblist = res.data.data[i].data
+              console.log(res.data.data[i].data)
+              break
+            }
+          }
+          // this.tblist = res.data
+        }).catch(e => {
+          console.log(e)
+        })
+      }
+    },
+    tableToExcel () {
+      const jsonData = this.tblist
+      // 列标题
+      let str = ''
+      if (this.fubiaotype === 'wz') {
+        str = '<tr><td>潮位</td><td>时间</td><td>警戒值</td></tr>'
+      } else {
+        str = '<tr><td>时间</td><td>浪高</td><td>浪向</td><td>波浪周期</td></tr>'
+      }
+      // 循环遍历，每行加入tr标签，每个单元格加td标签
+      for (let i = 0; i < jsonData.length; i++) {
+        str += '<tr>'
+        for (let item in jsonData[i]) {
+          // 增加\t为了不让表格显示科学计数法或者其他格式
+          str += `<td>${ jsonData[i][item] + '\t'}</td>`
+        }
+        str += '</tr>'
+      }
+      // Worksheet名
+      let worksheet = this.fbname
+      let uri = 'data:application/vnd.ms-excel;base64,'
+
+      // 下载的表格模板数据
+      let template = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset='UTF-8'><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+        <x:Name>${worksheet}</x:Name>
+        <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+        </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+        </head><body><table>${str}</table></body></html>`
+      // 下载模板
+      window.location.href = uri + this.base64(template)
+    },
+    base64 (s) {
+      return window.btoa(unescape(encodeURIComponent(s)))
     }
   }
 }
@@ -882,7 +1012,13 @@ export default {
     background-color:#ffffff;
   }
   .typhoon_info>.head{
-    padding:8px 0px 8px 0px;border-top-right-radius:10px;border-top-left-radius:10px;background-color:#AADAFF;color:#333333;width:100%;font-size:15px;text-align:center;
+    padding:8px 0px 8px 0px;
+    border-top-right-radius:10px;
+    border-top-left-radius:10px;
+    background-color:#AADAFF;
+    color:#333333;width:100%;
+    font-size:15px;
+    text-align:center;
   }
   .typhoon_info>div{
     padding:5px 0px 5px 0px;width:100%;
@@ -1028,5 +1164,121 @@ export default {
     -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     border-radius: 0;
     background: rgba(0,0,0,0.1);
+  }
+  .fw {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,.4);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .aui_close {
+    width: 20px;
+    height: 20px;
+    z-index: 1000;
+    line-height: 20px;
+    display: block;
+    /*position: absolute;*/
+    right:50px;
+    top: 1.5vh;
+    font-family: Helvetica, STHeiti,serif;
+    _font-family: '\u9ed1\u4f53', 'Book Antiqua', Palatino;
+    font-size: 18px;
+    border-radius: 20px;
+    background: #999;
+    color: #FFF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+    -moz-transition: linear .06s;
+    -webkit-transition: linear .06s;
+    transition: linear .06s;
+    padding: 0;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+  }
+  .aui_close:hover {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    right:50px;
+    top:1vh;
+    color: #FFF;
+    box-shadow: 0 1px 3px rgba(209, 40, 42,1);
+    background: #d1282a;
+    border-radius: 24px;
+    transition: all 0.2s ease-out;
+    opacity: 0.8;
+  }
+  .his {
+    width: 50%;
+    height: 50%;
+    background-color: #fff;
+    border-radius: 8px;
+    position: relative;
+    /*display: flex;*/
+    /*flex-wrap: wrap;*/
+  }
+  .header {
+    margin-top: 10px;
+    padding-left: 20px;
+    width: 100%;
+    height: 30px;
+    display: flex;
+    flex-wrap: nowrap;
+    border-bottom: 2px solid #95a1ad;
+  }
+  .tit {
+    width: 92%;
+  }
+  .main {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .top {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .select {
+    /*width: 10%;*/
+  }
+  select {
+    /*width: 100%;*/
+    /*padding: 0.5rem;*/
+    padding: 0 5px;
+    color: #000;
+    /*background-color: #344e76;*/
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid #000;
+    cursor: pointer;
+    /*margin-top: 2vh;*/
+  }
+  .table {
+    width: 100%;
+    height: 40vh;
+    overflow: auto;
+  }
+  .table_a {
+    margin-top: 10px;
+  }
+  .search {
+    margin-left: 5px;
+    font-size: 0.9rem;
+    padding: 3px;
+    background-color: #6cafe8;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
   }
 </style>
