@@ -124,7 +124,9 @@
         ],
         choosedata: 0,
         changeBk: 0,
-        jk: ''
+        jk: '',
+        type: '',
+        titleDate: ''
       }
     },
     component: {
@@ -173,9 +175,22 @@
             globalCoord: false // 缺省为 false
           },
           title: {
-            text: '',
+            text: (function () {
+              if (this_.szyb === 'hl') {
+                this_.type = '海浪预报'
+              } else if (this_.szyb === 'hw') {
+                this_.type = '海温预报'
+              } else if (this_.szyb === 'cx') {
+                this_.type = '潮汐预报'
+              }
+              return this_.area[this_.changeBk].name + this_.type
+            })(), //标题
+            left: 'center',//标题居中
+            top: 3,
+            padding: 0,
             textStyle: {
-              // color: 'rgba(241,251,255,1)'
+              color: '#333333',
+              fontWeight: 'bold'
             }
           },
           tooltip: {
@@ -197,6 +212,7 @@
             inactiveColor: 'white',
             type: 'scroll',
             data: ['预测值修正版', '预测值实测版'],
+            top: 24,
             textStyle: {
               // color: 'white'
             }
@@ -463,25 +479,33 @@
       },
       dataChange (k) {
         this.choosedata = k
+        let d0,d1,d2
         var date = new Date()
         var date2 = new Date(date.getTime() + (k - 1) * 24 * 60 * 60 * 1000)
         var date3 = new Date(date.getTime() + (k + 1) * 24 * 60 * 60 * 1000)
         this.today0 = new Date(date.getTime() + 0 * 24 * 60 * 60 * 1000)
         this.today1 = new Date(date.getTime() + 1 * 24 * 60 * 60 * 1000)
         this.today2 = new Date(date.getTime() + 2 * 24 * 60 * 60 * 1000)
+        d0 = this.format(this.today0, 1)
+        d1 = this.format(this.today1, 1)
+        d2 = this.format(this.today2, 1)
         this.today0 = this.format(this.today0, 2)
         this.today1 = this.format(this.today1, 2)
         this.today2 = this.format(this.today2, 2)
         this.todayE = null
         if (k === 0) {
           this.todayE = this.today0
+          this.titleDate = d0
         } else if (k === 1) {
           this.todayE = this.today1
+          this.titleDate = d1
         } else if (k === 2) {
           this.todayE = this.today2
+          this.titleDate = d2
         } else if (k === 3) {
           date2 = new Date(date.getTime() - 24 * 60 * 60 * 1000)
           date3 = new Date(date.getTime() + 3 * 24 * 60 * 60 * 1000)
+          this.titleDate = d0 + '未来三天'
           this.todayE = []
           this.todayE[0] = this.today0
           this.todayE[1] = this.today1
@@ -591,13 +615,23 @@
       },
       saveAsImage () {
         let content = this.myChart.getDataURL()
-
+        let this_ = this
         let aLink = document.createElement('a')
         let blob = this.base64ToBlob(content)
 
         let evt = document.createEvent('HTMLEvents')
         evt.initEvent('click', true, true)
-        aLink.download = 'line.png'
+        aLink.download =
+          (function () {
+            if (this_.szyb === 'hl') {
+              this_.type = '海浪预报'
+            } else if (this_.szyb === 'hw') {
+              this_.type = '海温预报'
+            } else if (this_.szyb === 'cx') {
+              this_.type = '潮汐预报'
+            }
+            return this_.area[this_.changeBk].name + this_.type + this_.titleDate + '.png'
+          })()
         aLink.href = URL.createObjectURL(blob)
         aLink.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }))
       },
@@ -644,7 +678,7 @@
             jarr.push(json1)
           }
         }
-      //console.log(JSON.stringify(jarr))
+        //console.log(JSON.stringify(jarr))
         // console.log(this.yuanShi[0].tm)
         axios({
           url: moren + this.jk,
