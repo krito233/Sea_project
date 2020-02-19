@@ -934,6 +934,27 @@ export default {
         }).catch(e => {
           console.log(e)
         })
+      } else {
+        // request({
+        //   url: '/thirdparty/tpdata/fb.do',
+        //   params: {
+        //     stcd: this.fub,
+        //     startTime: this.startTime + ' 00:00:00',
+        //     endTime: this.endTime + ' 23:00:00'
+        //   }
+        // }).then(res => {
+        //   console.log(res)
+        //   for (let i = 0; i < res.data.data.length; i++) {
+        //     if (this.fub === res.data.data[i].stcd) {
+        //       this.tblist = res.data.data[i].data
+        //       console.log(res.data.data[i].data)
+        //       break
+        //     }
+        //   }
+        //   // this.tblist = res.data
+        // }).catch(e => {
+        //   console.log(e)
+        // })
       }
     },
     tableToExcel () {
@@ -1236,6 +1257,8 @@ export default {
   }
   .tit {
     width: 95%;
+    font-size: 1.3rem;
+    font-weight: 600;
   }
   .main {
     width: 100%;
@@ -1246,7 +1269,7 @@ export default {
   }
   .top {
     width: 100%;
-    padding: 0 10px;
+    padding: 0 35px;
     box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
@@ -1268,7 +1291,7 @@ export default {
     /*margin-top: 2vh;*/
   }
   .table {
-    padding: 0 10px;
+    padding: 0 35px;
     width: 100%;
     height: 65vh;
     overflow: auto;
@@ -1280,7 +1303,7 @@ export default {
     margin-left: 5px;
     font-size: 0.9rem;
     padding: 3px;
-    background-color: #6cafe8;
+    background-color: #344e76;
     border-radius: 5px;
     cursor: pointer;
     color: #fff;
