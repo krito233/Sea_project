@@ -1216,8 +1216,8 @@ export default {
     opacity: 0.8;
   }
   .his {
-    width: 50%;
-    height: 50%;
+    width: 60%;
+    height: 75%;
     background-color: #fff;
     border-radius: 8px;
     position: relative;
@@ -1225,6 +1225,7 @@ export default {
     /*flex-wrap: wrap;*/
   }
   .header {
+    box-sizing: border-box;
     margin-top: 10px;
     padding-left: 20px;
     width: 100%;
@@ -1234,7 +1235,7 @@ export default {
     border-bottom: 2px solid #95a1ad;
   }
   .tit {
-    width: 92%;
+    width: 95%;
   }
   .main {
     width: 100%;
@@ -1245,6 +1246,8 @@ export default {
   }
   .top {
     width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1265,8 +1268,9 @@ export default {
     /*margin-top: 2vh;*/
   }
   .table {
+    padding: 0 10px;
     width: 100%;
-    height: 40vh;
+    height: 65vh;
     overflow: auto;
   }
   .table_a {
