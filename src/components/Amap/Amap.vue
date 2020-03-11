@@ -75,7 +75,8 @@
             <td v-if="fubiaotype!=='wz'">{{info.lx}}</td>
           </tr>
         </table>
-        <p style="margin-top: 4vh;">历史浪高图</p>
+        <p style="margin-top: 4vh;" v-if="fubiaotype!=='wz'">历史浪高图</p>
+        <p style="margin-top: 4vh;" v-if="fubiaotype ==='wz'">历史潮位图</p>
         <div id="container2" class="chartClass"></div>
       </div>
     </div>
@@ -90,6 +91,7 @@ import chart1 from '../chart1'
 import echarts from 'echarts'
 import vdate from './vdate'
 import laydate from '../../../static/laydate/laydate.js'
+import ElementUI from 'element-ui'
 // import  from 'iview/src/components/checkbox'
 
 export default {
@@ -551,7 +553,14 @@ export default {
         },
         yAxis: {
           type: 'value',
-          name: '潮位/m',
+          name:(function () {
+              if (this_.fubiaotype ==='wz'){
+                  return '潮位/m'
+              }
+              else {
+                  return '浪高/m'
+              }
+          }) (),
           // max:function(value){
           //   return parseInt(value.max)+1;
           // },
@@ -569,7 +578,12 @@ export default {
           trigger: 'axis',
           formatter: function (params) {
             var dataIndex = params.dataIndex
-            return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + params[0].value[1] + '米'
+              if (this_.fubiaotype ==='wz'){
+                  return '时间: ' + params[0].axisValue + '<br>潮位数值: ' + params[0].value[1] + '米'
+              }
+              else {
+                  return '时间: ' + params[0].axisValue + '<br>浪高数值: ' + params[0].value[1] + '米'
+              }
           }
         },
         series: [{
