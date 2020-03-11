@@ -1089,7 +1089,7 @@ export default {
   }
   #volet {
     width: 25vw;
-    max-height: 45vh;
+    max-height: 60vh;
     padding: 10px;
     background: #fff;
     color: #fff;
