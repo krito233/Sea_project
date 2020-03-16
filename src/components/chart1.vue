@@ -18,7 +18,8 @@
         <option :value="3">整体调整</option>
       </select>
       <button class="bn" @click="submit()">提交调整</button>
-      <button class="bn" @click="saveAsImage()">保存为图片</button>
+      <el-button class="bn" type="text" @click="open">保存为图片</el-button>
+<!--      <button class="bn" @click="saveAsImage()">保存为图片</button>-->
       <button class="bn" @click="cancell()">撤销</button>
     </div>
     <!--    <button class="bn" @click="tiptip=1">单点调整</button>-->
@@ -89,7 +90,7 @@
   import axios from 'axios'
   import index from '../router'
   // var tiptip = 1
-  //var moren = 'http://test.qdwanzhong.top'
+  // var moren = 'http://test.qdwanzhong.top'
   var moren = '..'
   export default {
     name: 'chart1',
@@ -143,6 +144,34 @@
       selectDay () {
         this.dataChange(this.va)
       },
+        open() {
+          let this_ = this
+            this.$prompt('请输入图片名称', '保存为图片', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputValue: (function () {
+                    if (this_.szyb === 'hl') {
+                        this_.type = '海浪预报'
+                    } else if (this_.szyb === 'hw') {
+                        this_.type = '海温预报'
+                    } else if (this_.szyb === 'cx') {
+                        this_.type = '潮汐预报'
+                    }
+                    return this_.area[this_.changeBk].name + this_.type + this_.titleDate
+                })()
+            }).then(({ value }) => {
+                this.saveAsImage(value)
+                this.$message({
+                    type: 'success',
+                    message: '保存成功: ' + value
+                });
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '取消保存'
+                });
+            });
+        },
       setstcd (stcd) {
         this.changeBk = stcd
         this.stcd = 'E' + (52 + stcd)
@@ -613,7 +642,7 @@
         this.data_a = this.data_b
         this.drawLine()
       },
-      saveAsImage () {
+      saveAsImage (name) {
         let content = this.myChart.getDataURL()
         let this_ = this
         let aLink = document.createElement('a')
@@ -623,14 +652,7 @@
         evt.initEvent('click', true, true)
         aLink.download =
           (function () {
-            if (this_.szyb === 'hl') {
-              this_.type = '海浪预报'
-            } else if (this_.szyb === 'hw') {
-              this_.type = '海温预报'
-            } else if (this_.szyb === 'cx') {
-              this_.type = '潮汐预报'
-            }
-            return this_.area[this_.changeBk].name + this_.type + this_.titleDate + '.png'
+            return name + '.png'
           })()
         aLink.href = URL.createObjectURL(blob)
         aLink.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }))

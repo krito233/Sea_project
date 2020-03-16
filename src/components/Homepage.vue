@@ -148,19 +148,19 @@
     <AMap class="map" ref="amap"/>
     <div class="l_part">
       <ul class="fri">
-        <li><div class="frili" @mouseover="changemenu(1)" :class="{friliActive:check_click === 1}">实况数据</div>
+        <li><div class="frili" @click="changemenu(1)" :class="{friliActive:check_click === 1}">实况数据</div>
 
         </li>
-        <li><div class="frili" @mouseover="changemenu(2)" :class="{friliActive:check_click === 2}">预报数据</div>
+        <li><div class="frili" @click="changemenu(2)" :class="{friliActive:check_click === 2}">预报数据</div>
         </li>
-        <li><div class="frili" @mouseover="changemenu(3)"  :class="{friliActive:check_click === 3}">周会商</div>
+        <li><div class="frili" @click="changemenu(3)"  :class="{friliActive:check_click === 3}">周会商</div>
         </li>
-        <li><div class="frili" @mouseover="changemenu(4)" :class="{friliActive:check_click === 4}">灾害警报</div>
+        <li><div class="frili" @click="changemenu(4)" :class="{friliActive:check_click === 4}">灾害警报</div>
         </li>
         <!--<li @click="typhoon(201918)">台风路径</li>-->
-        <li><div class="frili"  @mouseover="changemenu(5)" :class="{friliActive:check_click === 5}">近岸单元格数值预报</div>
+        <li><div class="frili"  @click="changemenu(5)" :class="{friliActive:check_click === 5}">近岸单元格数值预报</div>
         </li>
-        <li><div class="frili" @mouseover="changemenu(6)" :class="{friliActive:check_click === 6}">其他</div>
+        <li><div class="frili" @click="changemenu(6)" :class="{friliActive:check_click === 6}">其他</div>
 
         </li>
         <div class="copyright">青岛海之声科技有限公司技术服务</div>
@@ -1563,7 +1563,7 @@
   }
   #volet {
     width: 165px;
-    max-height: 70vh;
+    max-height: 80vh;
     padding: 10px;
     background: #fff;
     color: #fff;
@@ -1587,7 +1587,7 @@
     -webkit-transition: all .5s ease-in;
     -moz-transition: all .5s ease-in;
     transition: all .5s ease-in;
-    min-height: 400px;
+    min-height: 440px;
   }
   #volet a.ouvrir,
   #volet a.fermer {
