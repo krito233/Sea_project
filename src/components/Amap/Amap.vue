@@ -952,31 +952,33 @@ export default {
         request({
           url: '/thirdparty/tpdata/fb.do',
           params: {
-            stcd: this.fub,
+            // stcd: this.fub,
             startTime: this.startTime + ' 00:00:00',
             endTime: this.endTime + ' 23:00:00'
           }
         }).then(res => {
+          console.log(this.fub)
           console.log(res)
           if (this.fubiaotype === 'jp') {
             console.log(1)
-            for (let i = 0; i < res.data.data.length; i++) {
-              if (this.fub === res.data.data[i].stcd) {
-                this.tblist = res.data.data[i].data
-                console.log(res.data.data[i].data)
+            for (let i = 0; i < res.data.jpn.data.length; i++) {
+              if (this.fub === res.data.jpn.data[i].stcd) {
+                this.tblist = res.data.jpn.data[i].items
+                console.log(res.data.jpn.data[i].items)
                 break
               }
             }
           } else {
             console.log(2)
-          }
-          for (let i = 0; i < res.data.data.length; i++) {
-            if (this.fub === res.data.data[i].stcd) {
-              this.tblist = res.data.data[i].data
-              console.log(res.data.data[i].data)
-              break
+            for (let i = 0; i < res.data.tw.data.length; i++) {
+              if (this.fub === res.data.tw.data[i].stcd) {
+                this.tblist = res.data.tw.data[i].items
+                console.log(res.data.tw.data[i].items)
+                break
+              }
             }
           }
+
           // this.tblist = res.data
         }).catch(e => {
           console.log(e)

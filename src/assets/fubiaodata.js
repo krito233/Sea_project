@@ -38,14 +38,14 @@ const tw = [{
 {
   type: 'point',
   stnm: '金门',
-  stcd: 'jp05',
+  stcd: 'tw05',
   pos: [118.41,
     24.38]
 },
 {
   type: 'point',
   stnm: '马祖',
-  stcd: 'jp06',
+  stcd: 'tw06',
   pos: [120.51,
     26.35]
 }]
