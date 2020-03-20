@@ -20,7 +20,9 @@
       <button class="bn" @click="submit()">提交调整</button>
       <el-button class="bn" type="text" @click="open">保存为图片</el-button>
 <!--      <button class="bn" @click="saveAsImage()">保存为图片</button>-->
-      <button class="bn" @click="cancell()">撤销</button>
+<!--      <button class="bn" @click="cancell()">撤销</button>-->
+      <button class="bn" @click="undo(0)">上一步</button>
+      <button class="bn" @click="undo(1)">下一步</button>
     </div>
     <!--    <button class="bn" @click="tiptip=1">单点调整</button>-->
     <!--    <button class="bn" @click="tiptip=2">三点调整</button>-->
@@ -42,6 +44,12 @@
     width: 100%;
     position: absolute;
     text-align: center;
+  }
+  button:hover{
+    font-weight: bolder;
+  }
+  li:hover{
+    font-weight: bolder;
   }
   select{
     width: 8%;
@@ -108,6 +116,8 @@
         yuanShi: '',
         data_a: [[]],
         data_b: [[]],
+        data_h: [[]],
+        current_data: 0,
         va: 0,
         today0: '',
         today1: '',
@@ -494,6 +504,12 @@
           } else if (_this.tiptip === 1) {
             this_.data_a[dataIndex][1] = this_.data_a[dataIndex][1] + this_.myChart.convertFromPixel('grid', [0, dx.offsetY])[1] - y_smy
           }
+          this_.current_data++
+          this_.data_h[this_.current_data] = this_.trans(this_.data_a,0)
+          // this_.data_h[1] = this_.data_a
+          //   console.log(this_.data_h)
+          //   console.log(this_.current_data)
+           this_.data_h.length = this_.current_data+1
           this_.myChart.setOption({
             series: [{
               id: 'a',
@@ -572,6 +588,21 @@
           this.szyb = 'cx'
         }
       },
+      trans(cur,k){//k=0 保存，k=1 读出
+          let his =[]
+          if( k === 0){
+              for (let i = 0;i < cur.length;i++){
+                  his[i] = cur[i][1]
+              }
+          }else {
+              for (let i = 0;i < this.data_a.length;i++){
+                  his[i] = []
+                  his[i][0] = i
+                  his[i][1] = cur[this.current_data][i]
+              }
+          }
+          return his
+      },
       getData () {
         // let _this=this
         let item = this.myChart
@@ -618,6 +649,10 @@
                   this.data_a[i][1] = eval(res1.data.data[i].cw)
                 }
               }
+              this.data_h[0] = this.trans(this.data_a,0)
+              // this.data_h[0] = this.data_a
+              // this.data_h.length = 1
+              this.current_data = 0
               this.drawLine()
             })
 
@@ -656,6 +691,25 @@
           })()
         aLink.href = URL.createObjectURL(blob)
         aLink.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }))
+      },
+      undo(order){
+          if(order === 0){
+              if(this.current_data === 0){
+                  alert('当前已经是第一步')
+              }else{
+                  this.current_data--
+                  this.data_a = this.trans(this.data_h,1)
+                  this.drawLine()
+              }
+          }else {
+              if (this.current_data === this.data_h.length-1){
+                  alert('当前没有下一步')
+              }else {
+                  this.current_data++
+                  this.data_a = this.trans(this.data_h,1)
+                  this.drawLine()
+              }
+          }
       },
       submit () {
         var jarr = []
