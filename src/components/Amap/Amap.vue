@@ -20,6 +20,7 @@
             </div>
             <div class="search" @click="search">搜索</div>
             <div class="search" @click="tableToExcel">下载</div>
+            <a id="down" href="" style="display: none"></a>
           </div>
           <div class="table">
             <table class="table_a">
@@ -357,7 +358,7 @@ export default {
           }
           _this.myMap.add(_this.textList)
           _this.myMap.add(_this.fubiaoList)
-          _this.myMap.setZoomAndCenter(6, new AMap.LngLat(124.1028, 24.3653))
+          _this.myMap.setZoomAndCenter(10, new AMap.LngLat(120.803000, 27.971900))
         })
       }).catch(e => {
         console.log('获取失败' + e)
@@ -1017,7 +1018,14 @@ export default {
         </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
         </head><body><table>${str}</table></body></html>`
       // 下载模板
-      window.location.href = uri + this.base64(template)
+      let filename = this.fbname
+      if (this.startTime) {
+        filename = filename + '_' +  this.startTime + '--' + this.endTime
+      }
+      let down = document.getElementById('down')
+      down.href = uri + this.base64(template)
+      down.download = filename
+      down.click()
     },
     base64 (s) {
       return window.btoa(unescape(encodeURIComponent(s)))
