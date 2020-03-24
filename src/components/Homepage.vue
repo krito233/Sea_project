@@ -18,27 +18,27 @@
       <button class="aui_close" @click="imgclose">×</button>
       <ul class="btn_menu" v-if="(imgtype==='kr'&&kind===0)||(imgtype==='jpnqy')||imgtype==='euro'" style="position: absolute;left: 30px;top: 100px;z-index:500;">
         <li>
-          <button class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
+          <button id="dm" class="btn2" :class="{bactive:krheight === 0}" @click="hanguoimg(0)">地面</button>
         </li>
         <li v-if="imgtype==='kr'&&kind===0">
-          <button class="btn2" :class="{bactive:krheight === 4}" @click="hanguoimg(4)">地面2</button>
+          <button id="dm2" class="btn2" :class="{bactive:krheight === 4}" @click="hanguoimg(4)">地面2</button>
         </li>
         <li v-if="(imgtype!=='euro')&&(imgtype!=='jpmqy'&&kind!==1)">
-          <button class="btn2" :class="{bactive:krheight === 3&&imgtype!=='euro'}" @click="hanguoimg(3)">850hPa</button>
+          <button id="up85" class="btn2" :class="{bactive:krheight === 3&&imgtype!=='euro'}" @click="hanguoimg(3)">850hPa</button>
         </li>
         <li v-if="imgtype!=='euro'">
-          <button class="btn2" :class="{bactive:krheight === 2}" @click="hanguoimg(2)">700hPa</button>
+          <button id="up70" class="btn2" :class="{bactive:krheight === 2}" @click="hanguoimg(2)">700hPa</button>
         </li>
         <li>
-          <button class="btn2" :class="{bactive:krheight === 1}" @click="hanguoimg(1)">500hPa</button>
+          <button id="up50" class="btn2" :class="{bactive:krheight === 1}" @click="hanguoimg(1)">500hPa</button>
         </li>
       </ul>
       <ul class="btn_menu" v-if="imgtype==='cnwave'" style="position: absolute;left: 30px;top: 100px;z-index:500;">
         <li>
-          <button class="btn2" :class="{bactive:gjkind === 0}" @click="cnwaveimg(0)">HY2/Ascat</button>
+          <button id="hy2" class="btn2" :class="{bactive:gjkind === 0}" @click="cnwaveimg(0)">HY2/Ascat</button>
         </li>
         <li>
-          <button class="btn2" :class="{bactive:gjkind === 1}" @click="cnwaveimg(1)">JASON2</button>
+          <button id="jason" class="btn2" :class="{bactive:gjkind === 1}" @click="cnwaveimg(1)">JASON2</button>
         </li>
       </ul>
       <!--<ul class="btn_menu" v-if="imgtype==='euro'" style="position: absolute;left: 30px;top: 100px;z-index:500;">-->
@@ -303,7 +303,8 @@
         jason2list: [],
         gjkind: 0,
         showMenu: false,
-        place: '乐青湾'
+        place: '乐青湾',
+        selected: 0
       }
     },
     created () {
@@ -375,6 +376,7 @@
       },
       hanguoimg (flag) {
         // console.log(this.urllist.data)
+        // this.selected = flag
         this.cleanpic()
         this.num = 0
         this.krheight = flag
@@ -1033,7 +1035,7 @@
           }).then(res => {
             // this.urllist = res.data
             this.urllist = []
-            this.krheight = 0
+            // this.krheight = 0
             // this.isshow = !this.isshow
             // this.imgtype = type
             this.imgurl = head + res.data.data[0].url
@@ -1059,11 +1061,14 @@
             console.log(res)
             this.urllist = res.data
             this.surf = []
+            this.surf2 = []
             this.up50 = []
             this.up70 = []
             this.up85 = []
+            this.Ascatlist = []
+            this.jason2list = []
             this.urllist = []
-            this.krheight = 0
+            // this.krheight = 0
             // this.isshow = !this.isshow
             // this.imgtype = type
             this.imgurl = head + res.data.data[0].url
@@ -1078,6 +1083,8 @@
               for (let i = 0; i < res.data.data.length; i++) {
                 if (res.data.data[i].pic_name.substring(0, 4) === 'surf') {
                   this.surf.push(res.data.data[i])
+                } else if (res.data.data[i].pic_name.substring(0, 4) === 'sfc3') {
+                  this.surf2.push(res.data.data[i])
                 } else if (res.data.data[i].pic_name.substring(0, 4) === 'up50') {
                   this.up50.push(res.data.data[i])
                 } else if (res.data.data[i].pic_name.substring(0, 4) === 'up70') {
@@ -1086,6 +1093,19 @@
                   this.up85.push(res.data.data[i])
                 }
               }
+              let done = ''
+              if (this.krheight === 0) {
+                done = document.getElementById('dm');
+              } else if (this.krheight === 1) {
+                done = document.getElementById('up50');
+              } else if (this.krheight === 2) {
+                done = document.getElementById('up70');
+              } else if (this.krheight === 3) {
+                done = document.getElementById('up85');
+              } else if (this.krheight === 4) {
+                done = document.getElementById('dm2');
+              }
+              done.click()
             } else if (this.imgtype === 'jpnqy' && this.kind === 0) {
               for (let i = 0; i < res.data.data.length; i++) {
                 if (res.data.data[i].pic_name.substring(0, 3) === 'dim') {
@@ -1098,6 +1118,48 @@
                   this.up85.push(res.data.data[i])
                 }
               }
+              let done = ''
+              if (this.krheight === 0) {
+                done = document.getElementById('dm');
+              } else if (this.krheight === 1) {
+                done = document.getElementById('up50');
+              } else if (this.krheight === 2) {
+                done = document.getElementById('up70');
+              } else if (this.krheight === 3) {
+                done = document.getElementById('up85');
+              }
+              done.click()
+            } else if (this.imgtype === 'euro' & this.kind === 0) {
+              for (let i = 0; i < res.data.data.length; i++) {
+                if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 2, res.data.data[i].pic_name.length) === 'ms') {
+                  this.surf.push(res.data.data[i])
+                } else if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 2, res.data.data[i].pic_name.length) === '50') {
+                  this.up50.push(res.data.data[i])
+                }
+              }
+              let done = ''
+              if (this.krheight === 0) {
+                done = document.getElementById('dm');
+              } else if (this.krheight === 1) {
+                done = document.getElementById('up50');
+              }
+              done.click()
+            } else if (this.imgtype === 'cnwave') {
+              for (let i = 0; i < res.data.data.length; i++) {
+                // console.log(res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length))
+                if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length) === 't.png') {
+                  this.Ascatlist.push(res.data.data[i])
+                } else if (res.data.data[i].pic_name.substring(res.data.data[i].pic_name.length - 5, res.data.data[i].pic_name.length) === '2.png') {
+                  this.jason2list.push(res.data.data[i])
+                }
+              }
+              let done = ''
+              if (this.gjkind === 0) {
+                done = document.getElementById('hy2');
+              } else if (this.gjkind === 1) {
+                done = document.getElementById('jason');
+              }
+              done.click()
             }
           }).catch(e => {
             console.log('图片获取失败' + e)
