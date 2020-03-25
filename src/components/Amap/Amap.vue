@@ -19,7 +19,7 @@
               </select>
             </div>
             <div class="search" @click="search">搜索</div>
-            <div class="search" @click="tableToExcel">下载</div>
+            <div class="search" @click="downloadexc">下载</div>
             <a id="down" href="" style="display: none"></a>
           </div>
           <div class="table">
@@ -143,7 +143,8 @@ export default {
       startdate: null,
       enddate: null,
       fub: '',
-      tblist: ''
+      tblist: '',
+      excelname: ''
     }
   },
   mounted () {
@@ -974,14 +975,58 @@ export default {
         })
       }
     },
-    tableToExcel () {
+    downloadexc () {
+      let this_ = this
+      this.$prompt('请输入文件名称', '保存为图片', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputValue: (function () {
+          return this_.titleDate
+        })()
+      }).then(({ value }) => {
+        this.tableToExcel(value)
+        this.$message({
+          type: 'success',
+          message: '保存成功: ' + value
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '取消保存'
+        });
+      });
+    },
+    tableToExcel ( name ) {
       const jsonData = this.tblist
+      let filename = ''
+      let exc = name
       // 列标题
       let str = ''
       if (this.fubiaotype === 'wz') {
         str = '<tr><td>潮位</td><td>时间</td><td>警戒值</td></tr>'
+        for (let i = 0;i <this.wz.length ; i++) {
+          if (this.wz[i].stcd === this.fub) {
+            filename = this.wz[i].stnm
+            break
+          }
+        }
       } else {
         str = '<tr><td>时间</td><td>浪高</td><td>浪向</td><td>波浪周期</td></tr>'
+        if (this.fubiaotype === 'tw') {
+          for (let i = 0;i <this.tw.length ; i++) {
+            if (this.tw[i].stcd === this.fub) {
+              filename = this.tw[i].stnm
+              break
+            }
+          }
+        } else {
+          for (let i = 0;i <this.jp.length ; i++) {
+            if (this.jp[i].stcd === this.fub) {
+              filename = this.jp[i].stnm
+              break
+            }
+          }
+        }
       }
       // 循环遍历，每行加入tr标签，每个单元格加td标签
       for (let i = 0; i < jsonData.length; i++) {
@@ -993,7 +1038,7 @@ export default {
         str += '</tr>'
       }
       // Worksheet名
-      let worksheet = this.fbname
+      let worksheet = filename
       let uri = 'data:application/vnd.ms-excel;base64,'
 
       // 下载的表格模板数据
@@ -1006,13 +1051,13 @@ export default {
         </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
         </head><body><table>${str}</table></body></html>`
       // 下载模板
-      let filename = this.fbname
+      // let filename = this.fub
       if (this.startTime) {
-        filename = filename + '_' +  this.startTime + '--' + this.endTime
+        exc = name + '_' +  this.startTime + '--' + this.endTime
       }
       let down = document.getElementById('down')
       down.href = uri + this.base64(template)
-      down.download = filename
+      down.download = exc
       down.click()
     },
     base64 (s) {
