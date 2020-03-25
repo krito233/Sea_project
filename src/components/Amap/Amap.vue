@@ -536,21 +536,22 @@ export default {
           data: this_.dataTList.reverse(),
           name: '',
           axisLabel : {
+              show: true,
+              interval:24,
+              rotate:0,
+              textStyle: {
+                  color: '#333'
+              },
+              fontSize: 10,
 
-            formatter: function(){
-
-              return "";
-
+            formatter: function (value, index) {
+                var date = new Date(value);
+                var texts = [(date.getMonth() + 1), date.getDate()];
+                texts.unshift(date.getYear()+1900);
+                return texts.join('/');
             }
 
           },
-          //   (function () {
-          //  if(k === 2){
-          //    return this_.dataTList.reverse()
-          //  }else if(k === 3){
-          //    return this_.dataTList
-          //  }
-          // })()
         },
         yAxis: {
           type: 'value',
@@ -562,18 +563,12 @@ export default {
                   return '浪高/m'
               }
           }) (),
-          // max:function(value){
-          //   return parseInt(value.max)+1;
-          // },
-          // min:function(value){
-          //   return parseInt(value.min)-1;
-          // },
         },
         grid: {
           left: '10%',
           right: '5%',
           top: '20%',
-          bottom: '5%'
+          bottom: '15%'
         },
         tooltip: {
           trigger: 'axis',
@@ -589,13 +584,6 @@ export default {
         },
         series: [{
           data: this_.dataList.reverse(),
-          //   (function () {
-          //   if(k === 2){
-          //     return this_.dataList.reverse()
-          //   }else if(k === 3){
-          //     return this_.dataList
-          //   }
-          // })(),
           type: 'line'
         }]
       })
