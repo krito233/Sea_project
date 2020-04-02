@@ -651,7 +651,7 @@
               }
               this.data_h[0] = this.trans(this.data_a,0)
               // this.data_h[0] = this.data_a
-              // this.data_h.length = 1
+              this.data_h.length = 1
               this.current_data = 0
               this.drawLine()
             })

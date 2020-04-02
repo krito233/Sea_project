@@ -315,20 +315,27 @@ export default {
                 url: '/thirdparty/tpdata/wz.do',
                 params: {day: 2}
               }).then(res2 => {
-                this_.dataList = null
-                this_.dataList = []
-                this_.fubiaoinfo = res2.data.data[i].data
-                for (let x = 0; x < res2.data.data[i].data.length; x++) {
-                  this_.dataList[x] = []
-                  this_.dataList[x][0] = x
-                  if (res2.data.data[i].data[x].val === '-') {
-                    this_.dataList[x][1] = ''
-                  } else {
-                    this_.dataList[x][1] = eval(res2.data.data[i].data[x].val)
+                  // console.log(res2.data.error)
+                  this_.dataList = null
+                  this_.dataList = []
+                  this_.fubiaoinfo = []
+                  this_.dataTList = []
+                if(res2.data.error === '0'){
+                  this_.fubiaoinfo = res2.data.data[i].data
+                  for (let x = 0; x < res2.data.data[i].data.length; x++) {
+                    this_.dataList[x] = []
+                    this_.dataList[x][0] = x
+                    if (res2.data.data[i].data[x].val === '-') {
+                      this_.dataList[x][1] = ''
+                    } else {
+                      this_.dataList[x][1] = eval(res2.data.data[i].data[x].val)
+                    }
+                    this_.dataTList[x] = res2.data.data[i].data[x].tm
                   }
-                  this_.dataTList[x] = res2.data.data[i].data[x].tm
+                }else {
+                    alert('获取潮位数据失败')
                 }
-                console.log(this_.dataList)
+                // console.log(this_.dataList)
                 this_.drawHistory(2)
               })
               for (let j = 0; j < _this.fubiaoList.length; j++) {
@@ -418,21 +425,28 @@ export default {
                     day: 2
                   }
                 }).then(res2 => {
-                  // console.log(res2.data.tw.data[i].items)
-                  this_.dataList = null
-                  this_.dataList = []
-                  this_.fubiaoinfo = res2.data.tw.data[i].items
-                  for (let x = 0; x < res2.data.tw.data[i].items.length; x++) {
-                    this_.dataList[x] = []
-                    this_.dataList[x][0] = x
-                    if (res2.data.tw.data[i].items[x].lg === '-') {
-                      this_.dataList[x][1] = ''
-                    } else {
-                      this_.dataList[x][1] = eval(res2.data.tw.data[i].items[x].lg)
+                   // console.log(res2)
+                    this_.dataList = null
+                    this_.dataList = []
+                    this_.fubiaoinfo = []
+                    this_.dataTList = []
+                  if(!res2.data.tw.error){
+                    this_.fubiaoinfo = res2.data.tw.data[i].items
+                    for (let x = 0; x < res2.data.tw.data[i].items.length; x++) {
+                      this_.dataList[x] = []
+                      this_.dataList[x][0] = x
+                      if (res2.data.tw.data[i].items[x].lg === '-') {
+                        this_.dataList[x][1] = ''
+                      } else {
+                        this_.dataList[x][1] = eval(res2.data.tw.data[i].items[x].lg)
+                      }
+                      this_.dataTList[x] = res2.data.tw.data[i].items[x].tm
                     }
-                    this_.dataTList[x] = res2.data.tw.data[i].items[x].tm
+                    // console.log(this_.dataList)
                   }
-                  console.log(this_.dataList)
+                  else {
+                      alert('获取浪高数据失败')
+                  }
                   this_.drawHistory(2)
                 })
                 // marker.setLabel({
@@ -444,16 +458,24 @@ export default {
                 //   zIndex: 500
                 // })
               } else {
-                _this.fubiaoinfo = res.data.jpn.data[i].items
-                for (let x = 0; x < _this.fubiaoinfo.length; x++) {
-                  _this.dataList[x] = []
-                  _this.dataList[x][0] = x
-                  if (_this.fubiaoinfo[x].lg === '-') {
-                    _this.dataList[x][1] = ''
-                  } else {
-                    _this.dataList[x][1] = eval(_this.fubiaoinfo[x].lg)
-                  }
-                  _this.dataTList[x] = _this.fubiaoinfo[x].tm
+                  // console.log(res)
+                  _this.dataList = null
+                  _this.dataList = []
+                  _this.fubiaoinfo = []
+                  _this.dataTList = []
+                if(!res.data.jpn.error){
+                  _this.fubiaoinfo = res.data.jpn.data[i].items
+                  for (let x = 0; x < _this.fubiaoinfo.length; x++) {
+                    _this.dataList[x] = []
+                    _this.dataList[x][0] = x
+                    if (_this.fubiaoinfo[x].lg === '-') {
+                      _this.dataList[x][1] = ''
+                    } else {
+                      _this.dataList[x][1] = eval(_this.fubiaoinfo[x].lg)
+                    }
+                    _this.dataTList[x] = _this.fubiaoinfo[x].tm
+                  }}else {
+                    alert('获取浪高数据失败')
                 }
                 // console.log(_this.fubiaoinfo)
                 _this.drawHistory(3)
