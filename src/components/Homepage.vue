@@ -583,8 +583,14 @@
           }
         }
         if (type === 'euro') {
-          this.imgurl = head + res.data.data[0].url
-          this.imgflag = res.data.data[0].pic_name
+          if (res.data.data[0].pic_name.substring(res.data.data[0].pic_name.length - 2, res.data.data[0].pic_name.length) === 'ms') {
+            this.imgurl = head + res.data.data[0].url
+            this.imgflag = res.data.data[0].pic_name
+          } else {
+            this.imgurl = head + res.data.data[1].url
+            this.imgflag = res.data.data[1].pic_name
+          }
+          console.log(this.imgflag)
         }
       },
       typhoon (tfbh) {
